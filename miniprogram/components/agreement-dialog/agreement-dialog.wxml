@@ -1,0 +1,19 @@
+<view wx:if="{{visible}}" class="mask" catchtouchmove="noop">
+  <view class="dialog">
+    <view class="dialog-title">{{title}}</view>
+    <view class="dialog-desc">{{description}}</view>
+    <view class="legal-links">
+      <view data-type="agreement" bindtap="openLegal">用户协议（{{versions.userAgreementVersion}}）›</view>
+      <view data-type="privacy" bindtap="openLegal">隐私政策（{{versions.privacyPolicyVersion}}）›</view>
+      <view data-type="disclaimer" bindtap="openLegal">免责声明（{{versions.disclaimerVersion}}）›</view>
+    </view>
+    <checkbox-group bindchange="onCheckChange">
+      <label class="consent-row"><checkbox value="accepted" checked="{{checked}}" color="#0c6b68" /><text>我已阅读并同意上述文件</text></label>
+    </checkbox-group>
+    <view wx:if="{{errorMessage}}" class="dialog-error">{{errorMessage}}</view>
+    <view wx:if="{{busy}}" class="busy-text">{{busyText}}，请稍候…</view>
+    <button class="primary" loading="{{busy}}" disabled="{{busy}}" bindtap="confirm">{{confirmText}}</button>
+    <button wx:if="{{errorMessage && !busy}}" class="retry" bindtap="retry">{{retryText}}</button>
+    <button class="cancel" disabled="{{busy}}" bindtap="cancel">{{cancelText}}</button>
+  </view>
+</view>

@@ -1,0 +1,10 @@
+.id-text { margin-bottom: 28rpx; word-break: break-all; }
+.progress-card { text-align: center; }
+.status-label { color: #0c6b68; font-size: 25rpx; font-weight: 650; }
+.stage-title { margin: 18rpx 0; color: #173d51; font-size: 36rpx; font-weight: 700; }
+.progress-track { height: 18rpx; margin: 24rpx 0; border-radius: 999rpx; background: #dce9ec; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 999rpx; background: linear-gradient(90deg, #0c6b68, #41a59d); transition: width .25s; }
+.ready-card, .failed-card { text-align: center; }
+.ready-icon { width: 86rpx; height: 86rpx; margin: 0 auto 16rpx; border-radius: 50%; background: #e1f2ef; color: #0c6b68; font-size: 52rpx; line-height: 86rpx; }
+.failed-text { color: #9b4438; }
+.view-button { margin-top: 28rpx; }

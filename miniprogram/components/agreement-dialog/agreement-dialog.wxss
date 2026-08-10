@@ -1,0 +1,12 @@
+.mask { position: fixed; z-index: 1000; inset: 0; display: flex; align-items: flex-end; justify-content: center; background: rgba(7, 25, 36, .58); }
+.dialog { box-sizing: border-box; width: 100%; max-height: 88vh; padding: 38rpx 30rpx calc(28rpx + env(safe-area-inset-bottom)); border-radius: 30rpx 30rpx 0 0; background: #fff; overflow-y: auto; }
+.dialog-title { color: #14384c; font-size: 38rpx; font-weight: 700; }
+.dialog-desc { margin-top: 18rpx; color: #607581; font-size: 26rpx; line-height: 1.65; }
+.legal-links { margin: 24rpx 0; padding: 18rpx 22rpx; border-radius: 16rpx; background: #f1f7f7; color: #0c6b68; font-size: 27rpx; line-height: 2.1; }
+.consent-row { display: flex; align-items: flex-start; gap: 12rpx; color: #29495b; font-size: 27rpx; }
+.dialog-error { margin-top: 16rpx; color: #a43d31; font-size: 25rpx; }
+.busy-text { margin-top: 16rpx; color: #0c6b68; font-size: 25rpx; text-align: center; }
+.primary, .retry, .cancel { margin-top: 22rpx; min-height: 88rpx; border-radius: 17rpx; font-size: 29rpx; font-weight: 650; }
+.primary { border: 0; background: #0c6b68; color: #fff; }
+.retry { border: 1rpx solid #0c6b68; background: #fff; color: #0c6b68; }
+.cancel { border: 0; background: transparent; color: #657985; }

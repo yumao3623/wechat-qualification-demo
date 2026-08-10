@@ -1,0 +1,26 @@
+<view class="page">
+  <view class="page-title">企业资质预评估报告</view>
+  <async-state state="{{state}}" message="{{state === 'loading' ? '正在从 Backend 加载报告' : errorMessage}}" detail="{{requestId}}" bindretry="loadReport">
+    <view wx:if="{{state === 'success'}}">
+      <view class="card report-head">
+        <view class="row"><view class="company-name">{{report.enterprise.name}}</view><demo-badge /></view>
+        <view class="muted small">{{report.enterprise.subjectCode}} · 生成于 {{report.generatedAtText}}</view>
+        <view class="hash">规则集 {{report.ruleSetVersion}} · 报告版本 {{report.reportVersion}}</view>
+      </view>
+      <view class="notice strong-notice">{{report.disclaimer}}</view>
+      <view class="section-title qualification-heading">四类资质结果</view>
+      <view wx:for="{{report.qualifications}}" wx:key="qualificationType" class="card qualification-card status-{{item.status}}">
+        <view class="row"><view class="qualification-name">{{item.displayName}}</view><view class="status-pill">{{item.statusText}}</view></view>
+        <view class="summary">{{item.summary}}</view>
+        <view class="meta">适用地域：{{item.applicableRegion}} · 规则核验：{{item.checkedAt}}</view>
+        <view class="meta">需人工核验 {{item.manualReviewCount}} 项 · 主要提示：{{item.primaryGap}}</view>
+        <view class="card-actions">
+          <button class="link-button" data-type="{{item.qualificationType}}" bindtap="openEvidence">查看证据</button>
+          <button class="link-button" data-type="{{item.qualificationType}}" bindtap="openActions">缺口与行动</button>
+        </view>
+      </view>
+      <button class="primary-button consultant-button" bindtap="contactConsultant">联系顾问</button>
+      <view class="notice footer">页面只展示 Backend Report 快照，不在前端计算或改变资质状态。</view>
+    </view>
+  </async-state>
+</view>

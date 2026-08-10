@@ -1,0 +1,24 @@
+<view class="page">
+  <view class="step">STEP 4 / 4 · 后端诊断</view>
+  <view class="page-title">诊断进度</view>
+  <view class="muted id-text">诊断 ID：{{assessmentId}}</view>
+  <async-state state="{{state === 'loading' || state === 'error' ? state : 'success'}}" message="{{state === 'loading' ? '正在读取后端诊断状态' : errorMessage}}" detail="{{requestId}}" bindretry="refreshStatus">
+    <view wx:if="{{state === 'success'}}" class="card progress-card">
+      <view class="status-label">{{statusText}}</view>
+      <view class="stage-title">{{stageText}}</view>
+      <view class="progress-track"><view class="progress-fill" style="width: {{stageIndex / stageCount * 100}}%"></view></view>
+      <view class="muted small">阶段 {{stageIndex}} / {{stageCount}}。离开页面不会取消服务端诊断；返回前台会从 Backend 恢复。</view>
+    </view>
+    <view wx:if="{{state === 'ready'}}" class="card ready-card">
+      <view class="ready-icon">✓</view><view class="section-title">报告已生成</view>
+      <view class="muted">报告来自 Backend 持久化快照，包含四类资质、证据、缺口与行动。</view>
+      <button class="primary-button view-button" bindtap="viewReport">查看报告</button>
+    </view>
+    <view wx:if="{{state === 'failed'}}" class="card failed-card">
+      <view class="section-title">诊断未完成</view>
+      <view class="failed-text">{{failedMessage || '诊断处理失败，请重新发起。'}}</view>
+      <button class="primary-button view-button" bindtap="restartAssessment">重新发起</button>
+    </view>
+  </async-state>
+  <view class="notice">诊断状态为真实的 pending / processing / ready / failed；页面不执行资质规则。</view>
+</view>

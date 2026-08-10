@@ -1,0 +1,17 @@
+<view class="page">
+  <view class="page-title">{{title}} · 缺口与行动</view>
+  <async-state state="{{state}}" message="{{state === 'loading' ? '正在加载 Backend 行动清单' : state === 'empty' ? '当前未发现可自动识别的明确缺口' : errorMessage}}" detail="{{state === 'empty' ? '定性条件及主管部门审核仍需核验。' : requestId}}" bindretry="loadActions">
+    <view wx:if="{{state === 'success'}}">
+      <view wx:for="{{items}}" wx:key="id" class="card action-card priority-{{item.priority}}">
+        <view class="row"><view class="priority">{{item.priorityText}}</view><view wx:if="{{item.advisorRecommended}}" class="advisor">建议咨询顾问</view></view>
+        <view class="gap-title">{{item.title}}</view>
+        <view class="why">为什么重要：{{item.whyItMatters}}</view>
+        <view class="action-title">{{item.actionTitle}}</view>
+        <view class="description">{{item.actionDescription}}</view>
+        <view class="evidence">建议准备：{{item.evidenceText}}</view>
+        <view class="disclaimer">{{item.disclaimer}}</view>
+      </view>
+    </view>
+  </async-state>
+  <button class="primary-button consultant-button" bindtap="contactConsultant">联系顾问</button>
+</view>

@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "预评估报告",
+  "usingComponents": { "async-state": "/components/async-state/async-state", "demo-badge": "/components/demo-badge/demo-badge" }
+}

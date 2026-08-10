@@ -24,15 +24,22 @@ function normalizeApiError(response) {
   return new ApiError({ statusCode, retryable: statusCode >= 500 || statusCode === 0 });
 }
 
-function request({ path, method = 'GET', data, timeout = REQUEST_TIMEOUT_MS }) {
+function request({ path, method = 'GET', data, timeout = REQUEST_TIMEOUT_MS, token, idempotencyKey }) {
+  const header = { 'content-type': 'application/json' };
+  if (token) header.authorization = `Bearer ${token}`;
+  if (idempotencyKey) header['x-idempotency-key'] = idempotencyKey;
   return new Promise((resolve, reject) => {
     wx.request({
       url: `${API_BASE_URL}${path}`,
       method,
       data,
       timeout,
-      header: { 'content-type': 'application/json' },
+      header,
       success(response) {
+        if (response.statusCode === 204) {
+          resolve(null);
+          return;
+        }
         if (response.statusCode >= 200 && response.statusCode < 300 && response.data && Object.prototype.hasOwnProperty.call(response.data, 'data')) {
           resolve(response.data.data);
           return;
@@ -70,11 +77,59 @@ function getMissingFields(enterpriseId, supplements = { fields: {} }) {
   });
 }
 
+function login(code, idempotencyKey, client) {
+  return request({
+    path: '/api/auth/login', method: 'POST', idempotencyKey,
+    data: { code, client }
+  });
+}
+
+function getSession(token) {
+  return request({ path: '/api/auth/session', token });
+}
+
+function logout(token, idempotencyKey) {
+  return request({ path: '/api/auth/session', method: 'DELETE', token, idempotencyKey });
+}
+
+function createAssessment(body, token, idempotencyKey) {
+  return request({ path: '/api/assessments', method: 'POST', data: body, token, idempotencyKey });
+}
+
+function getAssessmentStatus(assessmentId, token) {
+  return request({ path: `/api/assessments/${encodeURIComponent(assessmentId)}/status`, token });
+}
+
+function getAssessmentReport(assessmentId, token) {
+  return request({ path: `/api/assessments/${encodeURIComponent(assessmentId)}/report`, token });
+}
+
+function getReports(token) {
+  return request({ path: '/api/reports?limit=50', token });
+}
+
+function getReport(reportId, token) {
+  return request({ path: `/api/reports/${encodeURIComponent(reportId)}`, token });
+}
+
+function submitLead(body, idempotencyKey) {
+  return request({ path: '/api/leads', method: 'POST', data: body, idempotencyKey });
+}
+
 module.exports = {
   ApiError,
+  createAssessment,
+  getAssessmentReport,
+  getAssessmentStatus,
   getEnterprise,
   getMissingFields,
+  getReport,
+  getReports,
+  getSession,
+  login,
+  logout,
   normalizeApiError,
   request,
-  searchEnterprises
+  searchEnterprises,
+  submitLead
 };

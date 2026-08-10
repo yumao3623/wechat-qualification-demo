@@ -41,6 +41,15 @@ function clearDraft(enterpriseId, { storage } = {}) {
   storageOrDefault(storage).removeStorageSync(`${DRAFT_PREFIX}${enterpriseId}`);
 }
 
+function clearAllDrafts({ storage } = {}) {
+  const adapter = storageOrDefault(storage);
+  const keys = adapter.getStorageInfoSync().keys || [];
+  for (const key of keys) {
+    if (key.startsWith(DRAFT_PREFIX)) adapter.removeStorageSync(key);
+  }
+  adapter.removeStorageSync(CURRENT_ENTERPRISE_KEY);
+}
+
 function setCurrentEnterprise(enterpriseId, { storage } = {}) {
   storageOrDefault(storage).setStorageSync(CURRENT_ENTERPRISE_KEY, enterpriseId);
 }
@@ -51,6 +60,8 @@ function getCurrentEnterprise({ storage } = {}) {
 
 module.exports = {
   DRAFT_PREFIX,
+  CURRENT_ENTERPRISE_KEY,
+  clearAllDrafts,
   clearDraft,
   createDraft,
   getCurrentEnterprise,

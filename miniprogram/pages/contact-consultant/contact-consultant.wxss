@@ -1,0 +1,10 @@
+.intro { margin-bottom: 28rpx; }
+.enterprise-row { display: flex; align-items: center; gap: 14rpx; }
+.enterprise-row .text-input { flex: 1; }
+.top-label { margin-top: 28rpx; }
+.direction-option { display: flex; align-items: center; gap: 10rpx; padding: 13rpx 0; color: #385667; font-size: 27rpx; }
+.counter { margin-top: 8rpx; color: #87949b; font-size: 22rpx; text-align: right; }
+.consent-card { font-size: 25rpx; }
+.consent-row { display: flex; align-items: flex-start; gap: 10rpx; }
+.error-notice { margin-bottom: 22rpx; border-left-color: #a34d3e; }
+.retry-button, .success-back { margin-top: 18rpx; }

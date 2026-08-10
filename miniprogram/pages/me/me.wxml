@@ -1,13 +1,19 @@
 <view class="page">
   <view class="profile-card card">
-    <view class="avatar">游</view>
-    <view><view class="guest-title">游客模式</view><view class="muted small">可免登录完成企业搜索、确认、画像与补数</view></view>
+    <view class="avatar">{{loggedIn ? '会' : '游'}}</view>
+    <view class="profile-copy">
+      <view class="guest-title">{{loggedIn ? 'Demo Session 已登录' : '游客模式'}}</view>
+      <view class="muted small">{{loggedIn ? '仅用于隔离本人诊断与保存报告' : '可免登录完成搜索、确认、画像与补数'}}</view>
+      <view wx:if="{{loggedIn && session}}" class="session-meta">{{session.authMode}} · 有效至 {{session.expiresAt}}</view>
+    </view>
   </view>
+  <view wx:if="{{errorMessage}}" class="notice error-notice">{{errorMessage}}</view>
   <view class="card menu-card">
     <view wx:for="{{items}}" wx:key="type" class="menu-item" data-type="{{item.type}}" bindtap="openLegal">
       <view><view class="menu-title">{{item.title}}</view><view class="menu-desc">{{item.desc}}</view></view>
       <view class="arrow">›</view>
     </view>
   </view>
-  <view class="notice">当前没有登录状态，因此不显示“退出登录”。法律与帮助页始终对游客开放。</view>
+  <button wx:if="{{loggedIn}}" class="secondary-button logout-button" loading="{{logoutBusy}}" disabled="{{logoutBusy}}" bindtap="logout">退出登录</button>
+  <view class="notice">法律与帮助页始终对游客开放。进入“我的”只验证已有本地 Session，不会自动调用 wx.login。</view>
 </view>

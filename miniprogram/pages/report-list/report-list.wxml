@@ -1,10 +1,36 @@
 <view class="page report-page">
-  <view class="empty-illustration">◎</view>
-  <view class="page-title">诊断完成后可在这里查看报告</view>
-  <view class="muted">当前是 Phase 5 游客预备流程。进入本 Tab 不会登录、不会授权，也不会创建 Session。</view>
-  <view class="card reason-card">
-    <view class="section-title">为什么后续查看保存报告需要登录？</view>
-    <view class="muted">登录只用于识别并隔离用户自己的诊断记录。完整登录与报告能力将在后续阶段接入。</view>
+  <view class="page-title">我的报告</view>
+  <view wx:if="{{state === 'guest'}}" class="guest-state">
+    <view class="empty-illustration">◎</view>
+    <view class="section-title">登录后查看保存的诊断</view>
+    <view class="muted">登录只用于识别并隔离您自己的报告。进入本 Tab 不会自动登录；点击按钮后仍需阅读并明确同意协议。</view>
+    <view wx:if="{{errorMessage}}" class="notice login-error">{{errorMessage}}<text wx:if="{{requestId}}"> · {{requestId}}</text></view>
+    <button class="primary-button login-button" bindtap="openLoginAgreement">登录查看报告</button>
+    <button class="secondary-button start-button" bindtap="startAssessment">先以游客开始预评估</button>
   </view>
-  <button class="primary-button" bindtap="startAssessment">返回首页开始准备</button>
+  <async-state wx:else state="{{state}}" message="{{state === 'loading' ? '正在加载保存的报告' : state === 'empty' ? '暂无诊断报告' : errorMessage}}" detail="{{state === 'empty' ? '完成一次诊断后，pending、processing、ready 或 failed 状态会显示在这里。' : requestId}}" bindretry="loadReports">
+    <button wx:if="{{state === 'empty'}}" class="primary-button empty-start" bindtap="startAssessment">开始预评估</button>
+    <view wx:if="{{state === 'success'}}">
+      <view wx:for="{{items}}" wx:key="assessmentId" class="card report-card status-{{item.status}}" data-index="{{index}}" bindtap="openItem">
+        <view class="row"><view class="company-name">{{item.enterprise.name}}</view><view class="status-pill">{{item.statusText}}</view></view>
+        <view class="meta">{{item.createdAtText}} · {{item.stageText}}</view>
+        <view wx:if="{{item.status === 'ready'}}" class="summary-list">
+          <view wx:for="{{item.summary}}" wx:key="qualificationType" class="summary-row"><text>{{item.statusText}}</text><text>{{item.summary}}</text></view>
+        </view>
+        <view wx:elif="{{item.status === 'failed'}}" class="failed-text">{{item.error.message}}</view>
+        <view wx:else class="muted progress-text">诊断仍在服务端推进，点击查看进度。</view>
+        <view class="open-text">{{item.status === 'ready' ? '查看报告' : '查看进度'}} →</view>
+      </view>
+    </view>
+  </async-state>
+  <agreement-dialog
+    id="reportAgreementDialog"
+    title="登录查看报告前请阅读"
+    description="登录仅用于识别并隔离您保存的 Demo 预评估报告。Demo Auth 不等同生产微信认证。"
+    confirm-text="同意并登录查看报告"
+    retry-text="重试登录"
+    cancel-text="暂不登录"
+    bindconfirm="onReportAgreementConfirmed"
+    bindretry="retryReportLogin"
+  />
 </view>

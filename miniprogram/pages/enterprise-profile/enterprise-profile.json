@@ -2,6 +2,7 @@
   "navigationBarTitleText": "企业画像",
   "usingComponents": {
     "async-state": "/components/async-state/async-state",
-    "demo-badge": "/components/demo-badge/demo-badge"
+    "demo-badge": "/components/demo-badge/demo-badge",
+    "agreement-dialog": "/components/agreement-dialog/agreement-dialog"
   }
 }

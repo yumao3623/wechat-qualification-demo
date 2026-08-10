@@ -33,9 +33,14 @@
       </view>
       <view wx:if="{{saveMessage}}" class="save-message">{{saveMessage}}</view>
       <button class="primary-button" bindtap="saveAndRecalculate">保存并重新计算缺失项</button>
+      <button class="primary-button diagnose-button" bindtap="openAgreement">使用当前数据发起诊断</button>
       <button class="secondary-button back-button" bindtap="backToProfile">返回企业画像</button>
     </view>
   </async-state>
-  <button wx:if="{{state === 'empty'}}" class="secondary-button empty-back" bindtap="backToProfile">返回企业画像</button>
+  <view wx:if="{{state === 'empty'}}" class="button-stack empty-actions">
+    <button class="primary-button" bindtap="openAgreement">发起诊断</button>
+    <button class="secondary-button" bindtap="backToProfile">返回企业画像</button>
+  </view>
   <view class="notice footer-notice">补充数据会标记为“用户补充”，只保存在当前小程序本地草稿中，2 小时后过期。</view>
+  <agreement-dialog id="agreementDialog" bindconfirm="onAgreementConfirmed" bindretry="retryAssessment" />
 </view>

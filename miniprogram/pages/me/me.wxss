@@ -1,9 +1,13 @@
 .profile-card { display: flex; align-items: center; gap: 24rpx; }
 .avatar { display: flex; align-items: center; justify-content: center; width: 92rpx; height: 92rpx; border-radius: 50%; background: #dff0ef; color: #0c6b68; font-size: 38rpx; font-weight: 700; }
 .guest-title { color: #173d51; font-size: 33rpx; font-weight: 680; }
+.profile-copy { flex: 1; min-width: 0; }
+.session-meta { margin-top: 8rpx; color: #778991; font-size: 21rpx; word-break: break-all; }
 .menu-card { padding-top: 0; padding-bottom: 0; }
 .menu-item { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; min-height: 120rpx; border-bottom: 1rpx solid #e5ecef; }
 .menu-item:last-child { border-bottom: 0; }
 .menu-title { color: #213f52; font-size: 29rpx; font-weight: 620; }
 .menu-desc { margin-top: 4rpx; color: #7a8992; font-size: 23rpx; }
 .arrow { color: #8ca0aa; font-size: 44rpx; }
+.logout-button { margin: 24rpx 0; color: #93473d; }
+.error-notice { margin-bottom: 24rpx; border-left-color: #a34d3e; }

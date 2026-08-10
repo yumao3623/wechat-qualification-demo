@@ -1,0 +1,13 @@
+.intro { margin-bottom: 26rpx; }
+.evidence-card { border-left: 7rpx solid #7c919a; }
+.result-unmet { border-left-color: #a34d3e; }
+.result-unknown { border-left-color: #d18323; }
+.result-manual_review { border-left-color: #337aa1; }
+.rule-id { color: #70828c; font-size: 23rpx; }
+.result-pill { padding: 6rpx 13rpx; border-radius: 999rpx; background: #edf3f5; color: #305267; font-size: 22rpx; }
+.criterion { margin: 16rpx 0; color: #173d51; font-size: 31rpx; font-weight: 680; }
+.detail-row { display: grid; grid-template-columns: 140rpx 1fr; gap: 18rpx; padding: 14rpx 0; border-top: 1rpx solid #e8eef1; font-size: 25rpx; }
+.detail-row text:first-child { color: #72828b; }
+.detail-row text:last-child { color: #29495b; word-break: break-all; }
+.explanation, .action { margin-top: 16rpx; padding: 18rpx; border-radius: 14rpx; background: #f3f7f8; color: #405d6c; font-size: 25rpx; }
+.action { background: #fff8e9; color: #72521c; }

@@ -1,0 +1,18 @@
+<view class="page">
+  <view class="page-title">{{title}} · 判断证据</view>
+  <view class="muted intro">以下内容逐项来自 Backend Report，不是页面重新判断。</view>
+  <async-state state="{{state}}" message="{{state === 'loading' ? '正在加载证据链' : state === 'empty' ? '报告中没有证据数据' : errorMessage}}" detail="{{requestId}}" bindretry="loadEvidence">
+    <view wx:if="{{state === 'success'}}">
+      <view wx:for="{{evidence}}" wx:key="id" class="card evidence-card result-{{item.result}}">
+        <view class="row"><view class="rule-id">{{item.ruleId}}</view><view class="result-pill">{{item.resultText}}</view></view>
+        <view class="criterion">{{item.criterion}}</view>
+        <view class="detail-row"><text>政策要求</text><text>{{item.requirement}}</text></view>
+        <view class="detail-row"><text>企业实际</text><text>{{item.actualValueText}}</text></view>
+        <view class="detail-row"><text>数据来源</text><text>{{item.sourcesText}}</text></view>
+        <view class="detail-row"><text>缺失信息</text><text>{{item.missingText}}</text></view>
+        <view class="explanation">{{item.explanation}}</view>
+        <view class="action">建议：{{item.action}}</view>
+      </view>
+    </view>
+  </async-state>
+</view>

@@ -1,0 +1,36 @@
+<view class="page">
+  <view class="page-title">联系顾问</view>
+  <view class="muted intro">游客可直接提交，不要求登录，也不要求微信手机号授权。</view>
+  <async-state wx:if="{{state === 'success'}}" state="empty" message="咨询需求已提交" detail="我们仅记录了本次 Demo 咨询需求；此状态不表示顾问已接单。">
+    <button class="secondary-button success-back" bindtap="back">返回</button>
+  </async-state>
+  <view wx:else>
+    <view class="card">
+      <label class="field-label">企业名称</label>
+      <view class="enterprise-row"><input class="text-input" value="{{enterpriseName}}" data-field="enterpriseName" maxlength="100" bindinput="onInput" /><demo-badge wx:if="{{enterpriseId}}" /></view>
+      <view wx:if="{{errors.enterpriseName}}" class="field-error">{{errors.enterpriseName}}</view>
+      <label class="field-label top-label">联系人</label>
+      <input class="text-input" value="{{contactName}}" data-field="contactName" maxlength="30" placeholder="2–30 个字符" bindinput="onInput" />
+      <view wx:if="{{errors.contactName}}" class="field-error">{{errors.contactName}}</view>
+      <label class="field-label top-label">手机号（手动填写）</label>
+      <input class="text-input" type="number" value="{{mobile}}" data-field="mobile" maxlength="11" placeholder="11 位中国大陆手机号" bindinput="onInput" />
+      <view wx:if="{{errors.mobile}}" class="field-error">{{errors.mobile}}</view>
+      <label class="field-label top-label">咨询方向</label>
+      <checkbox-group bindchange="onDirectionsChange">
+        <label wx:for="{{directionOptions}}" wx:key="value" class="direction-option"><checkbox value="{{item.value}}" color="#0c6b68" />{{item.label}}</label>
+      </checkbox-group>
+      <view wx:if="{{errors.directions}}" class="field-error">{{errors.directions}}</view>
+      <label class="field-label top-label">备注（可选）</label>
+      <textarea class="textarea" value="{{note}}" data-field="note" maxlength="500" placeholder="例如希望了解材料准备顺序" bindinput="onInput" />
+      <view class="counter">{{note.length}} / 500</view>
+      <view wx:if="{{errors.note}}" class="field-error">{{errors.note}}</view>
+    </view>
+    <view class="card consent-card">
+      <checkbox-group bindchange="onConsentChange"><label class="consent-row"><checkbox value="accepted" checked="{{consentAccepted}}" color="#0c6b68" />我同意为本次咨询联系目的处理以上信息（版本 {{noticeVersion}}）</label></checkbox-group>
+      <view wx:if="{{errors.consentAccepted}}" class="field-error">{{errors.consentAccepted}}</view>
+    </view>
+    <view wx:if="{{errorMessage}}" class="notice error-notice">{{errorMessage}}<text wx:if="{{requestId}}"> · {{requestId}}</text></view>
+    <button class="primary-button" loading="{{state === 'loading'}}" disabled="{{state === 'loading'}}" bindtap="submit">提交咨询需求</button>
+    <button wx:if="{{state === 'error'}}" class="secondary-button retry-button" bindtap="retry">使用同一请求重试</button>
+  </view>
+</view>

@@ -2,6 +2,7 @@ const { getEnterprise, getMissingFields } = require('../../services/api');
 const { loadDraft } = require('../../services/draft');
 const { FIELD_LABELS, flattenProfileFields, formatRegion, formatValue } = require('../../utils/format');
 const { prepareField } = require('../../utils/form');
+const assessmentFlow = require('../../services/assessment-flow');
 
 Page({
   data: {
@@ -43,5 +44,8 @@ Page({
   },
   openSupplement() {
     wx.navigateTo({ url: `/pages/business-supplement/business-supplement?id=${encodeURIComponent(this.data.enterpriseId)}` });
-  }
+  },
+  openAgreement() { assessmentFlow.openAgreement(this); },
+  onAgreementConfirmed(event) { assessmentFlow.confirmAgreement(this, event); },
+  retryAssessment() { assessmentFlow.retryAssessment(this); }
 });

@@ -7,6 +7,11 @@
     "pages/enterprise-confirm/enterprise-confirm",
     "pages/enterprise-profile/enterprise-profile",
     "pages/business-supplement/business-supplement",
+    "pages/assessment-progress/assessment-progress",
+    "pages/report-detail/report-detail",
+    "pages/evidence/evidence",
+    "pages/actions/actions",
+    "pages/contact-consultant/contact-consultant",
     "pages/legal/legal"
   ],
   "window": {

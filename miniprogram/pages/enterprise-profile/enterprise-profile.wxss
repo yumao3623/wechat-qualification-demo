@@ -13,3 +13,5 @@
 .need-row { padding: 18rpx 0; border-top: 1rpx solid #e8eef1; }
 .schema-intro { margin-bottom: 14rpx; }
 .supplement-button { margin-top: 24rpx; }
+.launch-card { margin-top: 24rpx; }
+.launch-button { margin-top: 24rpx; }

@@ -105,7 +105,7 @@ test('API 错误映射保留用户文案、字段和 request ID，不暴露额�
   assert.equal(Object.hasOwn(error, 'internal'), false);
 });
 
-test('Phase 5 app.json 页面成套存在，Tab 路径正确且无登录/授权调用', () => {
+test('Phase 6 app.json 页面成套存在，Tab 路径正确且敏感授权未引入', () => {
   const root = path.resolve(__dirname, '../../..');
   const mini = path.join(root, 'miniprogram');
   const appConfig = JSON.parse(fs.readFileSync(path.join(mini, 'app.json'), 'utf8'));
@@ -122,9 +122,13 @@ test('Phase 5 app.json 页面成套存在，Tab 路径正确且无登录/授权�
     .filter((file) => /\.(js|wxml|json)$/.test(file))
     .map((file) => fs.readFileSync(path.join(mini, file), 'utf8'))
     .join('\n');
-  assert.doesNotMatch(sourceFiles, /wx\.login\s*\(/);
-  assert.doesNotMatch(sourceFiles, /getPhoneNumber|getUserProfile|\/api\/auth\/login/);
+  assert.doesNotMatch(sourceFiles, /getPhoneNumber|getUserProfile/);
   assert.doesNotMatch(sourceFiles, /TODO|Lorem ipsum|Coming soon|AppSecret/);
+
+  const loginCallers = fs.readdirSync(mini, { recursive: true })
+    .filter((file) => file.endsWith('.js'))
+    .filter((file) => /\.login\s*\(/.test(fs.readFileSync(path.join(mini, file), 'utf8')) && /wxApi\.login\s*\(/.test(fs.readFileSync(path.join(mini, file), 'utf8')));
+  assert.deepEqual(loginCallers.map((file) => file.replaceAll('\\', '/')), ['services/auth.js']);
 
   const jsFiles = fs.readdirSync(mini, { recursive: true }).filter((file) => file.endsWith('.js'));
   const requestCallers = jsFiles.filter((file) => /wx\.request\s*\(/.test(fs.readFileSync(path.join(mini, file), 'utf8')));
@@ -135,6 +139,11 @@ test('Phase 5 app.json 页面成套存在，Tab 路径正确且无登录/授权�
     'pages/enterprise-confirm/enterprise-confirm',
     'pages/enterprise-profile/enterprise-profile',
     'pages/business-supplement/business-supplement',
+    'pages/assessment-progress/assessment-progress',
+    'pages/report-detail/report-detail',
+    'pages/evidence/evidence',
+    'pages/actions/actions',
+    'pages/contact-consultant/contact-consultant',
     'pages/legal/legal'
   ]) {
     assert.equal(appConfig.pages.includes(target), true, `导航目标 ${target} 未注册`);

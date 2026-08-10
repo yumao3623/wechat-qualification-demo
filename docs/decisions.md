@@ -226,3 +226,36 @@
 - 切换企业：每家企业使用独立 key；可保留 A 的未过期草稿以便用户返回，但 B 永远不读取 A 的 supplements/schema。这满足“不串企业”且避免误删用户刚填内容。
 - `list` 简化：当前 schema 未提供可生成完整知识产权/融资子表单的子字段定义，Phase 5 采用“每行一项”将用户声明组装为列表。页面明确说明权属、类型、状态、产品关联仍需核验；不将简化条目当作官方证据。
 - 未来：若 Phase 6/生产需要高质量知识产权预筛，应先扩展 Backend schema 的 list item 契约，再实现结构化子表单，不在前端猜测固定字段。
+
+## D-030 Phase 6 登录与 Session 前端边界
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：`wx.login` 唯一直接调用收敛到 `miniprogram/services/auth.js`。只有用户在发起诊断协议弹窗明确同意，或点击“登录查看报告”后在报告场景协议弹窗明确同意时，才调用 Session 创建函数；报告按钮点击本身不得登录。
+- Tab 行为：报告和“我的”进入时只读取并验证已有本地 Session；没有 token 时直接展示游客态，不调用 `wx.login`。Session 失效/过期时清除本地 token。
+- 本地保存：使用 `qualification-demo-session` 保存 `{ token, session }`；token 不进入 URL、页面 data、日志或错误文案。退出调用后端注销后清除 Session 和全部补充草稿。
+- 已有 Session：用户再次明确发起诊断时先验证并复用有效 Session，不为了形式重复调用 `wx.login`。这仍满足“明确同意后才允许调用”的时序边界。
+- 未决风险：`touristappid` 在目标微信开发者工具中是否支持完整 `wx.login` 仍需人工验证，因此 D-006 继续保留 `PROVISIONAL`，不能把自动测试当作 DevTools PASS。
+
+## D-031 Phase 6 Consent、重试与状态恢复
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：不新增独立 Consent API；沿用架构第 9.5.1 节，将协议版本、`accepted=true`、`agreedAt` 和 `assessment-dialog` 随 `POST /api/assessments` 一次提交。
+- 弹窗：组件每次 `open()` 都重置 `checked=false`。关闭/拒绝不保存同意、不登录、不创建诊断。
+- 幂等：登录与诊断使用不同幂等键；登录成功但诊断网络失败时，重试复用同一诊断 payload 和幂等键，不单独补交 Consent。
+- 状态：继续采用 D-015/D-026 的 HTTP 查询推进方案；前台 500ms 轮询，后台停止，回前台立即从 Backend 恢复。没有引入 WebSocket、消息队列或前端假状态机。
+
+## D-032 Phase 6 Report 与 Lead UI 数据边界
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- Report：报告详情、Evidence、Gap、Action 全部读取 Backend 持久化 Report；前端只进行中文枚举映射、日期和值的展示格式化，不导入或复写 Rule Engine。
+- 五态：报告 Tab 以本地 Session 和 `/api/reports` 返回的 Assessment 状态表达未登录、无报告、进行中、已完成和失败；混合状态允许同时出现在列表中。
+- Lead：顾问页保持游客可用，手机号手填，独立同意默认 `false`；不实现或暗示强制手机号授权。提交成功只显示“咨询需求已提交”。
+- 清理：诊断创建成功清理当前企业草稿；退出清理全部企业草稿。Backend 报告与 Lead 的保留语义不由前端注销改变。
+- 范围：Phase 6 不实现 Admin，未修改后端 Route/Service/Repository/Rule Engine 契约。
+
+## D-033 Report Tab 复用协议门
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 发现：Phase 6 初版的未登录报告按钮直接调用 Session 创建函数，虽然不是自动登录，但绕过了原始需求中“查看报告也须经协议同意”的前端时序门。
+- 修正：复用 `AgreementDialog` 的法律链接、默认未勾选、拒绝/关闭能力；报告场景使用独立标题和 CTA。按钮只打开弹窗，`confirm` 才创建/复用 Session 并加载列表。
+- 边界：已有有效 Session 不重复要求同意；报告查看不新增后端 Consent API，也不改诊断创建的 Consent Gate、权限隔离或 Rule Engine。

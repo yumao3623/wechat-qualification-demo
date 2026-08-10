@@ -44,6 +44,12 @@
         </async-state>
       </view>
       <view class="notice">用户补充值仅作为本次 Demo 草稿，不等于审计、官方平台或主管部门已核验。</view>
+      <view class="card launch-card">
+        <view class="section-title">准备发起诊断</view>
+        <view class="muted">即使仍有缺失字段，也可以生成“需补充数据”的后端报告。点击后先阅读协议，不会直接登录。</view>
+        <button class="primary-button launch-button" bindtap="openAgreement">发起诊断</button>
+      </view>
     </view>
   </async-state>
+  <agreement-dialog id="agreementDialog" bindconfirm="onAgreementConfirmed" bindretry="retryAssessment" />
 </view>

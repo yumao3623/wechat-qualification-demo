@@ -1,0 +1,11 @@
+.action-card { border-left: 8rpx solid #6e8792; }
+.priority-high { border-left-color: #a34d3e; }
+.priority-medium { border-left-color: #d18323; }
+.priority-low { border-left-color: #52879d; }
+.priority, .advisor { padding: 6rpx 13rpx; border-radius: 999rpx; background: #edf3f5; color: #345669; font-size: 22rpx; }
+.advisor { background: #e5f3f2; color: #0c6b68; }
+.gap-title { margin-top: 18rpx; color: #173d51; font-size: 31rpx; font-weight: 680; }
+.why, .description, .evidence { margin-top: 14rpx; color: #4d6572; font-size: 25rpx; }
+.action-title { margin-top: 22rpx; color: #0c6b68; font-size: 28rpx; font-weight: 650; }
+.disclaimer { margin-top: 18rpx; color: #7c6a45; font-size: 22rpx; }
+.consultant-button { margin-top: 28rpx; }

@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "补充经营数据",
-  "usingComponents": { "async-state": "/components/async-state/async-state" }
+  "usingComponents": {
+    "async-state": "/components/async-state/async-state",
+    "agreement-dialog": "/components/agreement-dialog/agreement-dialog"
+  }
 }

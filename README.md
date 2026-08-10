@@ -1,14 +1,14 @@
 # 企业政府资质预评估微信小程序 Demo
 
-> 当前状态：Phase 5（小程序游客前置流程）已实现，自动测试、真实 HTTP 游客 API 链路及微信开发者工具人工 E2E 均已通过。Phase 6 的协议、登录、诊断和报告页尚未实现，不能视为完整 Demo。
+> 当前状态：Phase 6（协议、登录、进度、报告与顾问完整流程）已实现；自动测试、真实 HTTP Backend 全链路及用户在微信开发者工具执行的 30 项核心人工验收均已通过。真机和专项异常/多尺寸验证仍为 `NOT EXECUTED`。Phase 7 Admin 未开始。
 
 ## 项目简介
 
 这是一个招聘能力验证用微信小程序 Demo。系统结合四家完全虚构的企业画像和用户主动补充的经营数据，对高新技术企业、科技型中小企业、专精特新中小企业和“雏鹰企业（杭州新雏鹰区域示例）”进行可解释预评估。
 
-本工具不是政府官方认定系统，不保证企业符合资质或获得补贴。当前可运行部分包含完整后端流程，以及原生微信小程序的游客首页、企业搜索、主体确认、企业画像、动态补数、报告游客占位、“我的”与法律/帮助页。
+本工具不是政府官方认定系统，不对资质或补贴结果作承诺。当前小程序已接通游客前置流程、协议弹窗、用户动作后的 Demo 登录、诊断进度、Backend 报告、证据、缺口/行动、报告 Tab、退出登录和游客顾问咨询。
 
-## Phase 5 已实现
+## Phase 6 已实现
 
 - `miniprogram/` 原生 WXML/WXSS/JavaScript 工程，三 Tab 为首页、报告、我的。
 - 游客可完成首页 → 搜索 → 主体确认 → 画像 → 动态补数，全程无登录、无授权、无协议强制。
@@ -17,7 +17,14 @@
 - 草稿按企业 ID 隔离、默认 2 小时 TTL；补充值按完整 measurement 口径发送，Backend 合并时标记 `sourceType=user`。
 - 统一 `services/api.js`、安全错误映射、请求超时、搜索竞态保护、Loading/Empty/Error/Success 和重试交互。
 - 游客可访问使用说明、隐私政策、用户协议和免责声明；未编造运营主体、客服电话或备案号。
-- Phase 5 代码中不存在 `wx.login`、手机号授权、`getUserProfile` 或 `/api/auth/login` 调用。
+- 协议弹窗每次打开均重置为未勾选；关闭、拒绝或未勾选确认都不登录、不创建诊断。
+- `wx.login` 只封装在 `services/auth.js`。诊断场景须在协议弹窗明确同意；报告场景点击“登录查看报告”只打开协议弹窗，明确勾选并确认后才登录。App 启动、首页及 Tab `onShow` 不调用。
+- Session token 仅保存在小程序本地 Session 存储并随受保护请求发送；Tab 只验证已存在 Session，不自动创建。
+- Consent 随冻结的 `POST /api/assessments` 一次提交；成功后清除对应企业敏感草稿。
+- 进度页轮询真实 `pending / processing / ready / failed`，后台停止，回前台从 Backend 恢复。
+- 报告、Evidence、Gap、Action 全部读取 Backend Report 快照；前端只做展示格式化，不执行 Rule Engine。
+- 报告 Tab 表达未登录、无报告、进行中、已完成、失败；“我的”仅已登录时显示退出。
+- 顾问表单游客可用，手机号手填、独立同意默认未勾选，不含强制手机号授权。
 
 已有 Phase 2–4 后端能力保持不变：
 
@@ -33,17 +40,17 @@
 - 游客顾问线索后端：独立隐私同意、字段校验、幂等保存。
 - JSON runtime 原子替换写入和单进程内串行写队列；损坏文件不会被静默覆盖为空。
 
-本阶段遵照任务边界，没有实现 Phase 6 的协议弹窗、`wx.login`、Session UI、诊断创建/进度、报告详情、证据、行动清单或顾问 UI，也没有实现 Admin。
+本阶段遵照任务边界，没有实现 Phase 7 Admin，也没有改变 Phase 2–5 已冻结的后端契约或 Rule Engine。
 
 ## 技术架构
 
 ```text
-Phase 5 小程序：
-原生微信小程序 ── 游客 REST/JSON ── Express API
+Phase 6 小程序：
+原生微信小程序 ── REST/JSON + Bearer Session ── Express API
        │                                │
-       ├─ 页面 + AsyncState/DemoBadge     ├─ EnterpriseProvider
-       ├─ 统一 API Client                 ├─ DynamicFieldService
-       └─ 按企业隔离的 TTL 草稿        └─ QualificationEngine
+       ├─ 协议/进度/报告/顾问页面          ├─ Session / Consent
+       ├─ 统一 API/Auth Client             ├─ Assessment / Report
+       └─ 按企业隔离的 TTL 草稿            └─ Lead / QualificationEngine
 
 Phase 2–4 后端：
 HTTP Route
@@ -74,9 +81,9 @@ miniprogram/
 ├── app.js / app.json / app.wxss / sitemap.json
 ├── config/index.js           # 本地 API 与草稿 TTL
 ├── components/{async-state,demo-badge}/
-├── services/{api,draft}.js
+├── services/{api,auth,assessment-flow,draft}.js
 ├── utils/{form,format}.js
-└── pages/                    # 首页、搜索、确认、画像、补数、报告游客态、我的、法律页
+└── pages/                    # 首页、搜索、确认、画像、补数、进度、报告、证据、行动、顾问、我的、法律页
 server/
 ├── data/fixtures/mock-enterprises.json
 └── src/
@@ -115,22 +122,26 @@ pnpm start
 
 1. 先在仓库根目录执行 `pnpm start`，确认 `http://127.0.0.1:3000/api/health` 返回 `ok`。
 2. 在微信开发者工具选择“导入项目”，项目目录选择本仓库根目录；工具会读取 [project.config.json](project.config.json) 并将 `miniprogram/` 作为小程序根目录。
-3. 未配置正式 AppID 时使用 `touristappid` 本地 Demo 配置；本阶段不调用需要正式 AppID 的登录能力。
+3. 当前 `project.config.json` 使用 `touristappid` 方便导入；Phase 6 的 `wx.login` 人工验收需要目标开发者工具环境支持该接口。若游客 AppID 受限，应改用评审方测试 AppID，但 AppSecret 仍不得进入仓库或小程序端。
 4. 本地开发允许关闭域名校验，`project.config.json` 已设置 `urlCheck=false`；该设置不得用于发布。
 
 ## 本地 API 配置
 
 小程序的 API 基址集中在 [miniprogram/config/index.js](miniprogram/config/index.js)，默认为 `http://127.0.0.1:3000`。微信开发者工具可访问电脑的该地址；真机中 `127.0.0.1`/`localhost` 指向手机自身，不能直接访问电脑 Backend。真机或发布环境需要 HTTPS 合法域名、微信后台 request 域名配置和正式服务端安全配置。
 
-## Phase 5 游客演示流程
+## Phase 6 完整演示流程
 
 1. 打开小程序，确认首页无登录、授权或协议弹窗。
 2. 点击“开始预评估”，输入“Demo”搜索四家虚构企业；输入无匹配词可验证 Empty。
 3. 选择“杭州市云舟微研 Demo 有限公司”，核对主体字段后确认。
 4. 在企业画像页查看已获取、缺失和当前需补充字段。
-5. 进入补数页，填写任意一项合法数据，点击“保存并重新计算缺失项”；剩余数应由 Backend 重新返回并减少。
-6. 返回画像，确认用户补充草稿可恢复；返回重选企业后确认不串数据。
-7. 查看报告 Tab 的游客占位和“我的”中四个法律/帮助入口。
+5. 进入补数页填写合法数据并保存；点击“使用当前数据发起诊断”。
+6. 验证协议默认未勾选；关闭后仍可浏览。重新打开、明确勾选并确认后，才观察到 `wx.login → /api/auth/login → /api/assessments`。
+7. 在进度页观察 `pending → processing → ready`，进入报告查看四类结果、证据链、缺口与行动。
+8. 切到报告 Tab 查看已保存报告；切到“我的”确认已登录并可退出。
+
+未登录单独验收报告 Tab 时：进入 Tab 只显示游客引导；点击“登录查看报告”打开默认未勾选的协议弹窗；关闭、拒绝或未勾选均保持游客态；明确勾选确认后才执行 `wx.login → /api/auth/login → /api/reports`。已有有效 Session 直接加载列表，不重复弹协议或登录。
+9. 从报告或行动页进入“联系顾问”，不登录也可手填手机号、独立勾选同意并提交；成功文案为“咨询需求已提交”。
 
 本阶段验证环境：Windows、Node.js v24.14.0、pnpm v11.16.0。项目 scripts 仍是可移植的 `node --test` 与 `node server/src/server.js`，不包含 Codex 运行时或用户目录绝对路径。
 
@@ -204,23 +215,25 @@ Demo 登录入口是 `POST /api/auth/login`。它只校验 code 形态与单次�
 pnpm test
 ```
 
-Phase 5 最近结果：74 tests，74 PASS，0 FAIL。在 Phase 2–4 全量回归基础上，新增覆盖动态表单 `0/false`、类型/单位/期间序列化、草稿 TTL/企业隔离、API 错误映射、页面成套存在、Tab 路径和无登录/授权调用。
+Phase 6 最近结果：85 tests，85 PASS，0 FAIL。在 Phase 2–5 全量回归基础上，新增协议默认值与协议快照、诊断/报告两种用户动作登录时序、Session 保存/验证、五态/阶段中文映射、Backend Evidence 展示格式、草稿退出清理、Lead 独立同意和静态合规覆盖。
 
-另已实际启动 Backend 并用真实 HTTP 跑通：Health → Demo Session → Consent → pending → processing → ready → 四类报告 → Report List → Logout → 旧 token 访问报告返回 401。详见 [docs/test-cases.md](docs/test-cases.md)。
+另以独立临时 runtime 和真实监听端口跑通：Demo Auth → Consent/Diagnosis → pending → processing → ready → Report（四类 + Evidence/Gap/Action）→ Reports List → 游客 Lead → Logout → 旧 token 访问报告返回 401。详见 [docs/test-cases.md](docs/test-cases.md)。
 
-2026-08-10 已在微信开发者工具完成人工验证：主页、三 Tab、冷启动无登录授权、企业搜索及 Empty、主体确认与返回、企业画像、动态补数 20→19、草稿恢复、切换企业不串数据、四个法律/帮助页面、Console/Network 合规检查以及错误与重试，全部 `PASS`。
+2026-08-10，用户在微信开发者工具实际完成 Phase 6 的 30 项核心人工验收，覆盖编译、冷启动/三 Tab 无自动登录、报告协议门、Session 复用、游客企业流程、诊断协议、创建/进度、四类报告、Evidence、Gap/Action、报告列表、顾问、法律入口、退出及 Console 检查，全部 `PASS`。
 
 ## 微信开发者工具人工验收结果
 
-`PASS`。自动化环境最初调用微信开发者工具 CLI `open/preview` 超时，随后由用户在微信开发者工具中手动导入并完成 Phase 5 人工 E2E 清单，页面编译、导航、游客请求、动态补数、草稿隔离、法律/帮助页、无登录行为及错误恢复均通过。该结果只代表开发者工具中的 Phase 5 游客流程；真机、Phase 6 和专项多尺寸/键盘/生命周期测试不包含在内。
+Phase 5 游客流程：`PASS`。Phase 6 微信开发者工具核心主流程：`PASS`（用户执行 30/30）。真机、故障注入、专项多尺寸/键盘和前后台生命周期：`NOT EXECUTED`。
 
 ## 已知限制
 
 - Demo Auth 不是真实微信认证，code 到 Demo user 的映射只服务本地演示。
 - JSON Repository 仅适合本地单进程低并发；没有数据库事务、跨进程锁、备份或灾备。
 - 查询时推进诊断状态是轻量异步模拟；没有队列或 worker。
-- 当前只有报告 Tab 的 Phase 5 游客占位；没有协议弹窗、登录/Session UI、诊断进度、报告详情、证据、行动、顾问页或 Admin。
-- 小程序已通过微信开发者工具中的 Phase 5 游客流程人工验证，但尚未完成真机、专项多尺寸/键盘遮挡和前后台生命周期验证。
+- Phase 6 核心 UI 已通过微信开发者工具人工验收，但 failed 状态构造、登录/诊断网络故障注入、前后台轮询恢复、专项多尺寸/键盘和真机网络尚未执行。
+- `touristappid` 是否允许目标环境完整执行 `wx.login` 仍需人工确认；不提供绕过微信登录的前端固定 code。
+- Demo Auth 以每个新 code 派生本地 Demo user；退出后用新 code 登录不承诺恢复原 Demo 用户历史，这与生产稳定微信身份不同。
+- Admin 仍未实现，按 Phase 7 保持边界。
 - 当前没有生产级限流、加密、访问审计、保留/删除流程或正式隐私合规评估。
 - 政策核验时点为 2026-08-10；年度通知及地方政策变化后必须更新规则版本。
 

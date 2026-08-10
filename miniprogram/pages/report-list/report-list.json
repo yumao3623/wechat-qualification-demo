@@ -1,1 +1,7 @@
-{ "navigationBarTitleText": "报告" }
+{
+  "navigationBarTitleText": "报告",
+  "usingComponents": {
+    "agreement-dialog": "/components/agreement-dialog/agreement-dialog",
+    "async-state": "/components/async-state/async-state"
+  }
+}

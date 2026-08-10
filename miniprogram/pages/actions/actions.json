@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "缺口与行动",
+  "usingComponents": { "async-state": "/components/async-state/async-state" }
+}

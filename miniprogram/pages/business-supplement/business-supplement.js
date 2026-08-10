@@ -1,6 +1,7 @@
 const { getMissingFields } = require('../../services/api');
 const { loadDraft, saveDraft } = require('../../services/draft');
 const { buildSupplements, hydrateRawValues, prepareField } = require('../../utils/form');
+const assessmentFlow = require('../../services/assessment-flow');
 
 Page({
   data: {
@@ -76,5 +77,8 @@ Page({
       });
     }
   },
-  backToProfile() { wx.navigateBack(); }
+  backToProfile() { wx.navigateBack(); },
+  openAgreement() { assessmentFlow.openAgreement(this); },
+  onAgreementConfirmed(event) { assessmentFlow.confirmAgreement(this, event); },
+  retryAssessment() { assessmentFlow.retryAssessment(this); }
 });

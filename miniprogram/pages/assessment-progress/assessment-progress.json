@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "诊断进度",
+  "usingComponents": { "async-state": "/components/async-state/async-state" }
+}

@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜技术架构与接口契约
 
-> 文档版本：Phase 5 / v1.3
+> 文档版本：Phase 6 / v1.4
 > 规格日期：2026-08-10  
-> 当前边界：Phase 5 已实现原生小程序游客前置流程、统一 API Client、企业隔离草稿和动态表单；Phase 4 的 Demo Auth、Session、协议门、诊断、Report 和 Lead API 保持可用，但本阶段小程序不调用它们。Admin 与 Phase 6 UI 尚未实现。
+> 当前边界：Phase 6 已在原生小程序接通 Phase 4 冻结的 Demo Auth、Session、Consent Gate、诊断、Report 与 Lead API。后端契约和 Rule Engine 未改变；Admin 仍未实现并留在 Phase 7。自动测试、真实 HTTP 联调及微信开发者工具 30 项核心人工验收均通过；真机和专项异常验证尚未执行。
 
 ## 1. 架构目标
 
@@ -489,8 +489,10 @@ Phase 4 的报告列表以当前用户的 Assessment 为主记录并关联已生
 ```text
 guest
   ├─ 浏览游客页面（无 auth 调用）
-  ├─ 报告 Tab 主动点击登录 ─┐
-  └─ 协议明确同意并确认 ────┴→ wx.login_pending
+  ├─ 报告 Tab 点击登录 → AgreementDialog（checked=false）
+  │                         ├─ 关闭/拒绝/未勾选 → guest
+  │                         └─ 明确同意并确认 ─┐
+  └─ 诊断协议明确同意并确认 ─────────────────┴→ wx.login_pending
                                       ├─ fail → guest/recoverable_error
                                       └─ code → POST /auth/login
                                                   ├─ fail → guest/recoverable_error
@@ -757,7 +759,7 @@ Repository：Phase 2 的只读 `EnterpriseRepository` / `JsonEnterpriseRepositor
 - API 变更必须先更新本契约；字段或规则变更同步 PRD 和测试。
 - 未获得官方平台/审计/专家证据的定性项不得因实现便利从 `manual_review` 改为 `met`。
 
-## 21. Phase 5 小程序实际架构
+## 21. Phase 5 小程序基础架构
 
 ### 21.1 目录与页面
 
@@ -781,7 +783,7 @@ miniprogram/
 ### 21.2 API Client 与错误
 
 - `services/api.js` 集中配置 `http://127.0.0.1:3000`、10 秒超时、JSON envelope 解包和 `ApiError`。页面不直接调用 `wx.request`。
-- Phase 5 仅导出 `searchEnterprises/getEnterprise/getMissingFields`，不导出或调用 Auth、Assessment Create、Report 或 Lead 客户端方法。
+- Phase 5 最初只导出游客 API；Phase 6 在同一 Client 中新增 Auth、Assessment、Status、Report/List、Logout 与 Lead 方法，没有新增或改变 Backend endpoint。
 - 错误页只展示服务端公共文案与可选 request ID；不透传 stack、路径或上游原始响应。
 
 ### 21.3 草稿与动态表单
@@ -794,3 +796,52 @@ miniprogram/
 ### 21.4 本地与发布网络边界
 
 `project.config.json` 的 `urlCheck=false` 只服务微信开发者工具本地 Demo。真机中 `127.0.0.1` 指向手机自身；真机/发布必须改用 HTTPS 合法域名、微信后台 request 域名配置和正式服务端安全配置。`touristappid` 不代表生产 AppID，仓库中不包含 AppSecret。
+
+## 22. Phase 6 小程序接入架构
+
+### 22.1 新增前端边界
+
+```text
+用户明确动作
+  ├─ 协议确认发起诊断 ───────────┐
+  └─ 报告 Tab 登录按钮 → 协议确认 ┴→ services/auth.js → wx.login → POST /api/auth/login
+                                      │
+                                      └→ qualification-demo-session（本地短期保存）
+
+协议确认 → services/assessment-flow.js
+  → POST /api/assessments（Consent 内嵌，独立诊断幂等键）
+  → assessment-progress（Status 轮询）
+  → report-detail / evidence / actions（只读 Backend Report）
+
+contact-consultant（游客）→ POST /api/leads（独立告知、独立幂等键）
+```
+
+- `wx.login` 的唯一直接调用位于 `miniprogram/services/auth.js` 的 `wxLogin()`；`App.onLaunch/onShow`、首页、报告 Tab `onShow` 和“我的” `onShow` 均不直接或间接创建 Session。
+- Report Tab 的登录按钮只调用 `AgreementDialog.open()`；组件每次重置 `checked=false`。只有 `confirm` 事件才调用 Session 创建能力，成功后加载 `/api/reports`；取消、关闭或未勾选均不触发 Auth。
+- 报告查看没有新增 Consent endpoint，也不修改 `POST /api/assessments` 的 Backend Consent Gate。报告协议是登录前端时序门；已有有效 Session 由 `onShow` 验证后直接加载列表，不重复同意。
+- 报告/“我的” Tab 只在检测到本地 token 时调用 `GET /api/auth/session` 验证；无 token 直接渲染游客状态。失效/过期 401 会清除本地 Session。
+- 本地 Session key 为 `qualification-demo-session`，结构为 `{ token, session }`。token 不进入页面 data、URL、日志或错误文案，只由 API Client 写入 Authorization header。
+- 用户退出调用冻结的 `DELETE /api/auth/session`，成功后清除 Session 和 `qualification-draft:*` / 当前企业 key。注销不删除 Backend 报告。
+
+### 22.2 Consent 与诊断时序
+
+继续执行第 9.5.1 节冻结顺序，未新增 Consent endpoint：
+
+1. `AgreementDialog.open()` 重置 `checked=false`。
+2. 只有勾选并确认时生成 `agreedAt` 和当前三个版本。
+3. 若无有效 Session，调用 `wx.login` 与 Demo Auth；已有有效 Session 则复用。
+4. 使用新诊断幂等键将 supplements、context、agreement 一次提交到 `POST /api/assessments`。
+5. 网络或创建失败时保留相同 payload/幂等键；成功后清除该企业本地草稿并导航进度页。
+
+### 22.3 状态、报告与五态
+
+- 进度采用已冻结的 HTTP 轮询，没有 WebSocket、worker 或前端假进度。前台间隔 500ms；`onHide/onUnload` 停止，`onShow` 立即恢复。
+- `ready` 后通过 `/api/assessments/:id/report` 或 `/api/reports/:id` 读取报告；Evidence/Gap/Action 对 `report.evidence/gaps/actions` 按 `qualificationType` 过滤展示。
+- `utils/report.js` 只做 `status/stage/result` 中文映射和可读格式化，不计算比例、不更改状态、不导入 Evaluator。
+- 报告 Tab 的未登录/无报告/进行中/已完成/失败全部由本地 Session 与 `/api/reports` 真实数据产生。
+
+### 22.4 Lead
+
+- 顾问页不读取或创建 Session，也不存在 `getPhoneNumber`、`getUserProfile` 或授权按钮。
+- 企业 ID 存在时先用企业详情 API 回填并由后端再次核对名称；无企业上下文可手填名称。
+- Lead 独立同意默认 `false`，提交时使用 `lead-privacy-2026-08-10`、`consultant_contact` 与独立幂等键；失败重试复用同一请求。

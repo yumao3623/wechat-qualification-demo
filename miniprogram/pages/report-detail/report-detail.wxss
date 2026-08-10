@@ -1,0 +1,18 @@
+.report-head { margin-top: 24rpx; }
+.company-name { flex: 1; color: #14384c; font-size: 34rpx; font-weight: 700; }
+.hash, .meta { margin-top: 12rpx; color: #73848e; font-size: 23rpx; }
+.strong-notice { margin-bottom: 32rpx; }
+.qualification-heading { margin-top: 30rpx; }
+.qualification-card { border-left: 8rpx solid #648696; }
+.status-promising { border-left-color: #24877d; }
+.status-opportunity { border-left-color: #337aa1; }
+.status-needs_data { border-left-color: #d18323; }
+.status-not_met { border-left-color: #a34d3e; }
+.status-not_applicable { border-left-color: #8a969c; }
+.qualification-name { flex: 1; color: #173d51; font-size: 31rpx; font-weight: 680; }
+.status-pill { padding: 7rpx 14rpx; border-radius: 999rpx; background: #edf4f5; color: #234e61; font-size: 23rpx; font-weight: 650; }
+.summary { margin-top: 20rpx; color: #405d6c; font-size: 27rpx; }
+.card-actions { display: flex; gap: 16rpx; margin-top: 24rpx; }
+.link-button { flex: 1; min-height: 76rpx; border: 1rpx solid #9db9c3; border-radius: 14rpx; background: #fff; color: #0c6b68; font-size: 25rpx; }
+.consultant-button { margin-top: 32rpx; }
+.footer { margin-top: 24rpx; }

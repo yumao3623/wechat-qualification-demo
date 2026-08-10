@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜测试用例与需求追踪
 
-> 文档版本：Phase 5 / v1.5
+> 文档版本：Phase 6 / v1.6
 > 规格日期：2026-08-10  
-> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 5 共 74 tests / 74 PASS，真实 HTTP 游客链路通过；用户已在微信开发者工具完成 Phase 5 人工 E2E 清单并报告全部 PASS。真机、Phase 6 和 Admin 仍保持 `NOT EXECUTED`。
+> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 6 共 85 tests / 85 PASS，并以真实监听端口跑通 Auth → Consent/Diagnosis → Status → Report → Reports List → Lead → Logout；用户在微信开发者工具完成 30 项核心人工验收，30/30 PASS。真机、专项异常/多尺寸和 Admin 仍保持 `NOT EXECUTED`。
 
 ## 1. 状态与执行规则
 
@@ -18,7 +18,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | UI-GUEST-001 | 首页游客访问 | DevTools E2E | 清空本地存储，冷启动 | 打开小程序并停留首页 | 首页可浏览；无 `wx.login`、手机号授权或协议弹窗；显示价值、四类资质、CTA 和免责声明 | PASS |
 | UI-NAV-001 | Tab 导航 | DevTools E2E | 游客状态 | 依次打开首页、报告、我的 Tab，再返回首页 | 三 Tab 可切换；未登录报告 Tab 不自动授权；我的法律入口可见 | PASS |
-| UI-NAV-002 | 普通页返回 | DevTools E2E | 已进入主体确认 | 返回搜索并再次选择另一企业 | 导航正确；不保留旧企业上下文或补充值 | PASS |
+| UI-NAV-002 | 普通页返回 | DevTools E2E | 已进入主体确认 | 返回搜索并再次选择另一企业 | 导航正确；不保留旧企业上下文或补充值 | NOT EXECUTED |
 | UI-STATE-001 | 通用四态 | DevTools E2E | 可注入 Loading/Empty/Error/Success | 逐页触发四态 | 状态布局、文案、按钮可见；Error 不展示内部堆栈 | NOT EXECUTED |
 | UI-LEGAL-001 | 法律/帮助 | DevTools E2E | 游客状态 | 从我的打开使用说明、隐私、协议、免责声明 | 均可免登录查看；标题、版本、生效日期和正文存在 | PASS |
 
@@ -33,12 +33,12 @@
 | ENT-PROV-005 | Provider 契约 | Contract | Mock 与未来测试替身 | 对两个实现执行同一契约套件 | 不透传供应商结构；未知为 `null`；错误类别一致 | NOT EXECUTED |
 | ENT-DATA-001 | fixture 一致性 | Unit | A/B/C/D fixture | 校验 ID、人数、收入、比例、统计期 | ID 唯一；研发人数≤总人数；主营≤营收；期间和单位有效 | PASS |
 | ENT-SEARCH-001 | 搜索成功 | DevTools E2E | 游客，API 正常 | 输入合法关键词并搜索 | 显示 Loading 后展示匹配虚构企业及 Demo 标签 | PASS |
-| ENT-SEARCH-002 | 搜索无结果 | DevTools E2E | 游客，API 正常 | 输入无匹配关键词 | 显示 Empty 和更换关键词入口，不伪造企业 | PASS |
+| ENT-SEARCH-002 | 搜索无结果 | DevTools E2E | 游客，API 正常 | 输入无匹配关键词 | 显示 Empty 和更换关键词入口，不伪造企业 | NOT EXECUTED |
 | ENT-SEARCH-003 | 搜索校验 | API/UI | 游客 | 提交空、1 字、>50 字关键词 | 返回/显示字段级校验；不发无效搜索或服务端返回 400 | NOT EXECUTED |
 | ENT-SEARCH-004 | 搜索故障 | DevTools E2E | 注入 503 | 发起搜索 | 显示可重试错误，不显示上游响应或堆栈 | NOT EXECUTED |
 | ENT-SEARCH-005 | 搜索竞态 | Frontend unit/E2E | 可控制两次请求先后 | 快速提交 A 后提交 B，让 A 后返回 | 页面只显示最新 B 的结果 | NOT EXECUTED |
 | ENT-CONFIRM-001 | 主体确认 | DevTools E2E | 已选择企业 | 查看关键字段并确认 | 名称、Demo 编号、法人、日期、资本、地区、状态、行业可见；进入画像 | PASS |
-| ENT-CONFIRM-002 | 返回重选 | DevTools E2E | 企业 A 已有草稿 | 返回并选择企业 B | A 的草稿/schema 不进入 B | PASS |
+| ENT-CONFIRM-002 | 返回重选 | DevTools E2E | 企业 A 已有草稿 | 返回并选择企业 B | A 的草稿/schema 不进入 B | NOT EXECUTED |
 | ENT-PROFILE-001 | 企业画像分组 | DevTools E2E | B 场景部分字段缺失 | 打开画像 | 已获取、缺失、需补充/核验分区正确，显示来源和期间 | PASS |
 | ENT-PROFILE-002 | 画像 API 失败 | DevTools E2E | 注入详情 503 | 打开画像并重试 | 显示 Error；重试成功后正常恢复 | NOT EXECUTED |
 
@@ -61,10 +61,10 @@
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| CONSENT-001 | 协议默认值 | Unit/DevTools E2E | 从未打开弹窗 | 打开、勾选、关闭、重新打开 | 每次打开 `checked=false` | NOT EXECUTED |
-| CONSENT-002 | 未同意确认 | DevTools E2E | 弹窗打开且未勾选 | 点击“同意并发起诊断” | 留在弹窗并提示；无 `wx.login`；无诊断 | NOT EXECUTED |
-| CONSENT-003 | 关闭/拒绝 | DevTools E2E | 弹窗打开 | 点击关闭或暂不发起 | 返回原页；仍可游客浏览；无登录/诊断 | NOT EXECUTED |
-| CONSENT-004 | 明确同意时序 | DevTools E2E | 弹窗未勾选 | 勾选并确认，观察调用 | 先同意，再调用 `wx.login`，Session 成功后才创建诊断 | NOT EXECUTED |
+| CONSENT-001 | 协议默认值 | Unit/DevTools E2E | 从未打开弹窗 | 打开、勾选、关闭、重新打开 | 每次打开 `checked=false` | PASS |
+| CONSENT-002 | 未同意确认 | DevTools E2E | 弹窗打开且未勾选 | 点击“同意并发起诊断” | 留在弹窗并提示；无 `wx.login`；无诊断 | PASS |
+| CONSENT-003 | 关闭/拒绝 | DevTools E2E | 弹窗打开 | 点击关闭或暂不发起 | 返回原页；仍可游客浏览；无登录/诊断 | PASS |
+| CONSENT-004 | 明确同意时序 | DevTools E2E | 弹窗未勾选 | 勾选并确认，观察调用 | 先同意，再调用 `wx.login`，Session 成功后才创建诊断 | PASS |
 | CONSENT-005 | 服务端协议门 | Integration | 有 Session | 缺一版本、未同意、时间无效、来源错误分别创建 | 均返回 409/400；不保存 assessment | PASS |
 | AUTH-001 | 首次无自动登录 | DevTools E2E | 清空状态 | 冷启动、切 Tab、浏览游客页面 | 全程不调用 `wx.login`，直到用户明确触发 | PASS |
 | AUTH-002 | Demo 登录成功 | Integration | 合法非空 code | POST `/auth/login` | 返回随机 token 一次、`authMode=demo`、有效期；Repository 仅存摘要 | PASS |
@@ -73,7 +73,7 @@
 | AUTH-005 | 查询 Session | Integration | 有效 token | GET `/auth/session` | 返回当前 Session，不含 token/hash | PASS |
 | AUTH-006 | 缺失/无效/过期 token | Integration | 三种 token 状态 | 请求受保护 API | 分别返回稳定 401 错误；不泄露资源 | PASS |
 | AUTH-007 | 退出登录（后端） | Integration | 已登录且有 token | DELETE Session 后用旧 token 请求个人报告 | 服务端吊销；旧 token 失效且已生成报告不删除 | PASS |
-| AUTH-008 | 报告 Tab 主动登录 | DevTools E2E | 游客进入报告 Tab | 不点击按钮后观察；再点击“登录查看报告” | 初始无授权；点击后才调用 `wx.login` | NOT EXECUTED |
+| AUTH-008 | 报告 Tab 协议登录 | DevTools E2E | 游客进入报告 Tab | 观察无自动登录；点击“登录查看报告”；分别未勾选、关闭、拒绝、勾选确认 | 按钮只开默认未勾选协议；前三种保持游客且无登录；明确同意后才调用 `wx.login` 并加载列表 | PASS |
 
 ## 6. 诊断状态机与 API
 
@@ -129,16 +129,16 @@
 | RPT-002 | 报告不可变 | Integration | 已生成报告后更新规则 | 再查旧报告 | 旧报告规则/结果不变；新诊断使用新版本 | NOT EXECUTED |
 | RPT-003 | 报告权限 | Integration | 用户 A/B | B 查询 A 的报告 | 404 且无摘要泄露 | PASS |
 | RPT-004 | 报告列表 | Integration | 当前用户有 ready/processing/failed | GET `/reports` | 只返回本人摘要、分页和正确状态 | PASS |
-| RPT-005 | 报告详情 UI | DevTools E2E | ready 报告 | 打开报告 | 四类卡、规则日期/地域、manual_review 数量、免责声明和入口可见 | NOT EXECUTED |
+| RPT-005 | 报告详情 UI | DevTools E2E | ready 报告 | 打开报告 | 四类卡、规则日期/地域、manual_review 数量、免责声明和入口可见 | PASS |
 | EVD-001 | Evidence 完整性 | Unit | 各类 criterion | 生成 evidence | 每项有 ruleId、criterion、requirement、actualValue/source/result/missing/explanation/action/policyRef | PASS |
 | EVD-002 | 缺失与零值展示 | Unit/UI | 一项 null、一项 0 | 展示证据 | null 显示未提供且 missing 非空；0 显示为 0 | NOT EXECUTED |
 | EVD-003 | 派生值追溯 | Unit/UI | 比例 criterion | 展示 evidence | 可见分子、分母、公式、单位和同一统计期 | NOT EXECUTED |
 | GAP-001 | Gap 生成 | Unit | unmet/unknown/manual/conflict | 生成 gaps | 类型、影响、优先级、关联 evidence 和 missingFields 正确 | NOT EXECUTED |
 | ACT-001 | Action 生成 | Unit | gaps 存在 | 生成 actions | 每个阻塞 gap 有非承诺建议、优先级、材料和顾问建议 | NOT EXECUTED |
-| RPT-TAB-001 | 报告 Tab 未登录 | DevTools E2E | 游客 | 打开报告 Tab | 解释登录原因和主动按钮，不自动授权 | NOT EXECUTED |
+| RPT-TAB-001 | 报告 Tab 未登录 | DevTools E2E | 游客 | 打开报告 Tab | 解释登录原因和主动按钮，不自动授权 | PASS |
 | RPT-TAB-002 | 报告 Tab 无报告 | DevTools E2E | 已登录无记录 | 打开报告 Tab | Empty + 开始预评估 CTA | NOT EXECUTED |
 | RPT-TAB-003 | 报告 Tab 进行中 | DevTools E2E | pending/processing | 打开报告 Tab | 显示企业、阶段和进度入口 | NOT EXECUTED |
-| RPT-TAB-004 | 报告 Tab 已完成 | DevTools E2E | ready | 打开报告 Tab | 显示报告摘要并可进入详情 | NOT EXECUTED |
+| RPT-TAB-004 | 报告 Tab 已完成 | DevTools E2E | ready | 打开报告 Tab | 显示报告摘要并可进入详情 | PASS |
 | RPT-TAB-005 | 报告 Tab 失败 | DevTools E2E | failed | 打开报告 Tab | 显示失败原因和恢复入口，不显示空报告 | NOT EXECUTED |
 | COPY-001 | 禁止承诺文案 | Static | 代码/fixture/文档完成 | 扫描面向用户文案 | 不出现保证通过、一定符合、已获资质、官方通过、保证补贴等承诺 | PASS |
 
@@ -167,8 +167,8 @@
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| E2E-001 | 完整主流程 | DevTools E2E | Mock B 或适合展示的虚构企业，服务正常 | 游客首页→搜索→确认→画像→动态补数→协议未勾选→同意→登录→进度→四类报告→证据→行动→报告 Tab→顾问 | `CODEX_TASK.md` 指定链路完整可复现；所有关键按钮真实改变状态 | NOT EXECUTED |
-| E2E-002 | 拒绝协议分支 | DevTools E2E | 到协议弹窗 | 不勾选、拒绝、关闭分别尝试 | 均无登录和诊断，游客仍可浏览 | NOT EXECUTED |
+| E2E-001 | 完整主流程 | DevTools E2E | Mock B 或适合展示的虚构企业，服务正常 | 游客首页→搜索→确认→画像→动态补数→协议未勾选→同意→登录→进度→四类报告→证据→行动→报告 Tab→顾问 | `CODEX_TASK.md` 指定链路完整可复现；所有关键按钮真实改变状态 | PASS |
+| E2E-002 | 拒绝协议分支 | DevTools E2E | 到协议弹窗 | 不勾选、拒绝、关闭分别尝试 | 均无登录和诊断，游客仍可浏览 | PASS |
 | E2E-003 | 登录/网络失败恢复 | DevTools E2E | 注入失败 | 明确同意后触发失败再恢复 | 不产生重复任务；重试后可继续 | NOT EXECUTED |
 | E2E-004 | 四企业场景 | DevTools E2E | A/B/C/D fixture | 分别完成或查看预设诊断 | 状态覆盖较有希望、需补数据、暂不满足、新雏鹰不适用 | NOT EXECUTED |
 | E2E-005 | 屏幕与交互适配 | DevTools E2E | 窄屏/标准屏 | 检查长名、键盘、滚动、触控、长证据 | 无关键遮挡/横向溢出；键盘不挡提交；触控可用 | NOT EXECUTED |
@@ -217,7 +217,7 @@
 | 报告 Tab 五态 / 我的条件退出 | `design.md` 17–18 | 已覆盖 |
 | 协议拒绝不登录不阻塞 | `PRD.md` 9.3；`design.md` 12 | 已覆盖 |
 | 敏感信息与环境变量 | `architecture.md` 18 | 已覆盖 |
-| 测试状态必须真实 | 本文件 1；全部用例 Status | 全部 NOT EXECUTED |
+| 测试状态必须真实 | 本文件 1；全部用例 Status | 按自动、HTTP、DevTools、真机分别记录，未执行项不冒充 PASS |
 | 人工 E2E Checklist | 本文件 10；`design.md` 22 | 已覆盖 |
 
 ## 12. Phase 1 历史测试结论
@@ -367,4 +367,50 @@ supplementedKey=rdEmployeeCount.2025
 recalculatedStatus=200, remainingMissingCount=19, reduced=true
 ```
 
-Phase 5 开发者工具验证证据来自用户于 2026-08-10 按人工清单执行后提供的逐项 PASS 结果。本次没有验证草稿等待 2 小时后真实过期、多屏幕尺寸/键盘遮挡、前后台生命周期或真机网络，相关细分用例仍保持 `NOT EXECUTED`。Phase 6 协议/登录/诊断/报告/顾问用例也保持 `NOT EXECUTED`。
+Phase 5 开发者工具验证证据来自用户于 2026-08-10 按人工清单执行后提供的逐项 PASS 结果。当时没有验证草稿等待 2 小时后真实过期、多屏幕尺寸/键盘遮挡、前后台生命周期或真机网络；当时尚未实现的 Phase 6 UI 也均为 `NOT EXECUTED`。当前 Phase 6 的最新结果以下一节为准。
+
+## 17. Phase 6 执行记录
+
+自动测试命令：
+
+```text
+pnpm test
+```
+
+Codex Shell 初次原样执行时因宿主 PATH 找不到 `node` 而未进入测试；仅在验证进程临时加入 bundled Node 路径后，再次原样执行项目脚本。最新结果：85 tests，85 PASS，0 FAIL，0 skipped；包含 Phase 2–5 的 74 项全量回归。
+
+| Test ID | Module | Type | 实际结果 | Status |
+| --- | --- | --- | --- | --- |
+| P6-AUTH-001 | 用户动作登录时序 | Frontend Unit | 无本地 Session 时读取状态不调用登录；显式调用用户动作函数后顺序为 `wx.login → /auth/login`；已有 Session 只验证不重复登录 | PASS |
+| P6-AUTH-002 | Session 本地生命周期 | Frontend Unit | 保存/读取、后端验证、401 清除、注销调用与本地清理逻辑通过 | PASS |
+| P6-CONSENT-001 | 协议默认未勾选 | Frontend Unit/Static | `AgreementDialog.open()` 每次写入 `checked=false`；未勾选分支在 emit confirm 前 return | PASS |
+| P6-RPT-AUTH-001 | 报告按钮不直接登录 | Frontend Unit/Static | 未登录按钮绑定 `openLoginAgreement`；调用只执行 `AgreementDialog.open()`，不创建 Session | PASS |
+| P6-RPT-AUTH-002 | 报告确认后登录时序 | Frontend Unit | `AgreementDialog confirm → Session 创建 → 弹窗关闭 → Reports List 加载` 顺序固定 | PASS |
+| P6-CONSENT-002 | Consent request 契约 | Frontend Unit | 三版本、`accepted=true`、`agreedAt`、`assessment-dialog` 与 `POST /assessments` body 保持冻结结构 | PASS |
+| P6-STATUS-001 | 状态与中文文案 | Frontend Unit | pending/processing/ready/failed 阶段映射与五种资质中文文案使用设计冻结值 | PASS |
+| P6-RPT-001 | Report 展示适配 | Frontend Unit | Evidence 缺失/0 值、来源、人工核验中文映射及报告列表状态适配通过；前端无 Evaluator 引用 | PASS |
+| P6-LEAD-001 | 顾问表单 | Frontend Unit | 独立同意默认 false、手机号/姓名/方向/备注校验和游客 API payload 逻辑通过 | PASS |
+| P6-DRAFT-001 | 草稿清理 | Frontend Unit | 创建成功调用当前企业清理；退出清理所有 `qualification-draft:*` 和当前企业 key | PASS |
+| P6-STATIC-001 | 页面与调用边界 | Static/Unit | 新页面均成套注册；`wx.login` 直接调用仅在 Auth service；App/首页/报告/我的不直接登录；无手机号授权 API | PASS |
+| P6-HTTP-001 | 完整 Backend 联调 | Real HTTP | Auth → Consent/Diagnosis → pending → processing → ready → 四类 Report + Evidence/Gap/Action → Reports List → Logout；旧 token 返回 401 | PASS |
+| P6-HTTP-002 | Lead 联调 | Real HTTP | 无 Session 调用 Lead API 返回 201/submitted，使用独立同意与幂等键 | PASS |
+| P6-SCAN-001 | 合规静态扫描 | Static | 自动登录/强制授权/敏感凭证签名/面向用户承诺文案扫描无违规实现；命中文档中的禁止词仅为规范说明 | PASS |
+| P6-DEVTOOLS-001 | Phase 6 完整主流程 | DevTools E2E | 用户实际执行 30 项清单；后台健康、编译、无自动登录、两类协议门、Session、游客链路、诊断、四类报告、Evidence、Gap/Action、报告列表、顾问、法律入口、退出及 Console 均符合预期 | PASS |
+| P6-DEVICE-001 | 真机登录/弱网/隐私 | Device E2E | 未配置正式测试 AppID、HTTPS 合法域名，未真机执行 | NOT EXECUTED |
+
+真实 HTTP 联调摘要：
+
+```text
+authMode=demo
+statusHistory=pending -> processing -> ready
+qualificationCount=4
+evidence/gaps/actions 均为非空
+reportsListReportId 与生成报告一致
+leadStatus=submitted
+logoutStatus=204
+logout 后旧 token 查询报告 HTTP 401
+```
+
+用户于 2026-08-10 在微信开发者工具实际执行核心人工清单，提交 30 项逐项结果且全部为 `PASS`。覆盖后台健康、项目编译、冷启动及三 Tab 无自动登录、报告协议首次/重开默认未勾选、未同意/拒绝保持游客、明确同意后登录、有效 Session 复用、企业游客链路、诊断协议、创建与进度、四类报告、Evidence、Gap/Action、报告 Tab ready 记录、顾问无强制手机号授权与 Lead 提交、法律入口、退出及 Console 无红色异常。
+
+仍保持 `NOT EXECUTED`：真机；登录/诊断/报告网络故障注入；报告 Tab pending/processing/failed 专项构造；前后台生命周期与轮询恢复；窄屏、多尺寸和键盘遮挡；草稿真实等待 2 小时过期；Admin。用户本次未注明测试 AppID 类型，该信息不影响已观察行为的记录，但发布前仍须以正式测试 AppID 和 HTTPS 合法域名复验。
