@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜测试用例与需求追踪
 
-> 文档版本：Phase 1 / v1.0  
+> 文档版本：Phase 2 / v1.1
 > 规格日期：2026-08-10  
-> 执行说明：Phase 1 只完成测试规格，没有实现可执行系统。以下所有测试均真实保持 `NOT EXECUTED`；文档审查不等同功能测试通过。
+> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider。Phase 2 只更新实际执行覆盖到的用例；Phase 3 及之后用例继续保持 `NOT EXECUTED`。
 
 ## 1. 状态与执行规则
 
@@ -26,12 +26,12 @@
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| ENT-PROV-001 | Mock Provider 搜索 | Unit | 四家虚构 fixture | 搜索可匹配关键词 | 返回正确摘要；均有 `isDemoData=true`、`DEMO-*` 编号和虚构标签 | NOT EXECUTED |
-| ENT-PROV-002 | Mock Provider 无结果 | Unit | Provider 可用 | 搜索不存在关键词 | 返回空数组而非异常 | NOT EXECUTED |
-| ENT-PROV-003 | Mock Provider 详情 | Unit | 已知企业 ID | 查询详情 | 返回 canonical profile、字段 provenance、`fetchedAt` 和 Demo 标签 | NOT EXECUTED |
-| ENT-PROV-004 | Mock Provider 不存在 ID | Unit | 不存在 ID | 查询详情 | Provider 返回 `null`，service 映射为 404 | NOT EXECUTED |
+| ENT-PROV-001 | Mock Provider 搜索 | Unit | 四家虚构 fixture | 搜索可匹配关键词 | 返回正确摘要；均有 `isDemoData=true`、`DEMO-*` 编号和虚构标签 | PASS |
+| ENT-PROV-002 | Mock Provider 无结果 | Unit | Provider 可用 | 搜索不存在关键词 | 返回空数组而非异常 | PASS |
+| ENT-PROV-003 | Mock Provider 详情 | Unit | 已知企业 ID | 查询详情 | 返回 canonical profile、字段 provenance、`fetchedAt` 和 Demo 标签 | PASS |
+| ENT-PROV-004 | Mock Provider 不存在 ID | Unit | 不存在 ID | 查询详情 | Provider 返回 `null`，service 映射为 404 | PASS |
 | ENT-PROV-005 | Provider 契约 | Contract | Mock 与未来测试替身 | 对两个实现执行同一契约套件 | 不透传供应商结构；未知为 `null`；错误类别一致 | NOT EXECUTED |
-| ENT-DATA-001 | fixture 一致性 | Unit | A/B/C/D fixture | 校验 ID、人数、收入、比例、统计期 | ID 唯一；研发人数≤总人数；主营≤营收；期间和单位有效 | NOT EXECUTED |
+| ENT-DATA-001 | fixture 一致性 | Unit | A/B/C/D fixture | 校验 ID、人数、收入、比例、统计期 | ID 唯一；研发人数≤总人数；主营≤营收；期间和单位有效 | PASS |
 | ENT-SEARCH-001 | 搜索成功 | DevTools E2E | 游客，API 正常 | 输入合法关键词并搜索 | 显示 Loading 后展示匹配虚构企业及 Demo 标签 | NOT EXECUTED |
 | ENT-SEARCH-002 | 搜索无结果 | DevTools E2E | 游客，API 正常 | 输入无匹配关键词 | 显示 Empty 和更换关键词入口，不伪造企业 | NOT EXECUTED |
 | ENT-SEARCH-003 | 搜索校验 | API/UI | 游客 | 提交空、1 字、>50 字关键词 | 返回/显示字段级校验；不发无效搜索或服务端返回 400 | NOT EXECUTED |
@@ -155,9 +155,9 @@
 | ADMIN-002 | Admin Lead 列表 | Browser E2E | 本地有 Lead | 打开 Admin | 显示要求字段，手机号默认脱敏；只读 | NOT EXECUTED |
 | ADMIN-003 | Admin 本地限制 | Integration | 非本地来源/未启用 | 请求 Admin API | 403；页面明确非生产权限方案 | NOT EXECUTED |
 | API-001 | 统一成功/错误格式 | Integration | API 可用 | 覆盖 2xx/400/401/404/409/422/500/503 | 响应符合 envelope；含 requestId；无堆栈 | NOT EXECUTED |
-| API-002 | 404 | Integration | 任意未知路由 | 请求不存在 endpoint | 返回 JSON 404，不返回 HTML 堆栈 | NOT EXECUTED |
+| API-002 | 404 | Integration | 任意未知路由 | 请求不存在 endpoint | 返回 JSON 404，不返回 HTML 堆栈 | PASS |
 | API-003 | 输入边界 | Integration | API 可用 | 提交超长、错误类型、未知枚举、逻辑矛盾 | 返回稳定校验错误；无异常崩溃 | NOT EXECUTED |
-| SEC-001 | 敏感信息扫描 | Static | 工程和配置存在 | 扫描 Key/Secret/token/密码模式 | 无真实 AppSecret、企查查 Secret、token、生产密码 | NOT EXECUTED |
+| SEC-001 | 敏感信息扫描 | Static | 工程和配置存在 | 扫描 Key/Secret/token/密码模式 | 无真实 AppSecret、企查查 Secret、token、生产密码 | PASS |
 | SEC-002 | 日志脱敏 | Integration | 触发登录、Lead、诊断错误 | 检查日志 | 不记录 code、Bearer token、完整手机号或经营敏感 payload | NOT EXECUTED |
 | SEC-003 | Runtime Git 隔离 | Static | 运行生成数据 | 检查 Git 状态 | `.env`、runtime JSON、token/Lead 数据不被跟踪 | NOT EXECUTED |
 | ERR-001 | JSON 损坏 | Integration | runtime 文件损坏 | 启动/读取 | 返回明确内部错误并保留损坏文件，不静默覆盖为空 | NOT EXECUTED |
@@ -220,7 +220,7 @@
 | 测试状态必须真实 | 本文件 1；全部用例 Status | 全部 NOT EXECUTED |
 | 人工 E2E Checklist | 本文件 10；`design.md` 22 | 已覆盖 |
 
-## 12. Phase 1 测试结论
+## 12. Phase 1 历史测试结论
 
 - 功能测试：`NOT EXECUTED`（无正式实现，符合阶段边界）。
 - API 测试：`NOT EXECUTED`。
@@ -228,3 +228,32 @@
 - 微信开发者工具 E2E：`NOT EXECUTED`。
 - 真机验证：`NOT EXECUTED`。
 
+## 13. Phase 2 执行记录
+
+自动测试命令（桌面环境使用 bundled Node 的绝对路径执行等价 `node --test`）：
+
+```text
+node --test
+```
+
+结果：22 tests，22 PASS，0 FAIL，0 skipped。以下为 Phase 2 新增的精确执行追踪：
+
+可移植性复核：`package.json` 的 `test` 为 `node --test`，`start` 为 `node server/src/server.js`。Codex App Shell 的 bundled Node 未默认加入 PATH；仅在验证进程临时补齐 PATH 后，标准 `pnpm test` 通过 22/22，标准 `pnpm start` 启动并返回健康检查 `ok/mock`。未向仓库写入任何宿主绝对路径。
+
+| Test ID | Module | Type | Precondition | Steps | Expected | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| P2-HEALTH-001 | Health Check | Integration + live HTTP | Backend 可启动 | GET `/api/health` | 200；统一 envelope；`status=ok`；Provider 为 mock；有 request ID | PASS |
+| P2-API-001 | 企业搜索 | Integration + live HTTP | 四家 fixture | GET `/api/enterprises?keyword=星澜` | 200；只返回 A；摘要为 canonical 且标记 Demo | PASS |
+| P2-API-002 | 搜索无结果 | Integration | Provider 可用 | 搜索“没有匹配” | 200；`items=[]`，不返回 404 | PASS |
+| P2-API-003 | 企业详情 | Integration + live HTTP | A 存在 | GET `/api/enterprises/demo-a-001` | 200；详情、provenance、Demo 标识完整 | PASS |
+| P2-API-004 | 企业不存在 | Integration | 合法但不存在 ID | 查询 `demo-z-999` | 404 `ENTERPRISE_NOT_FOUND`，无 stack | PASS |
+| P2-API-005 | 企业输入校验 | Integration | API 可用 | 空/1 字/数组关键词，非法 limit/cursor/ID | 400 `VALIDATION_ERROR`，字段原因与 request ID 完整 | PASS |
+| P2-API-006 | 搜索 cursor 分页 | Integration | 四家 fixture | 以 `limit=2` 连续请求两页 | 两页无重复覆盖四家；末页 `nextCursor=null` | PASS |
+| P2-API-007 | JSON body parsing | Integration | API 可用 | 提交畸形 JSON | 400 `VALIDATION_ERROR`；定位 body；无 stack | PASS |
+| P2-ARCH-001 | Route / Provider 解耦 | Integration | 注入不读取 fixture 的 fake Provider | 搜索并查详情 | Route 使用注入返回；调用参数符合 Provider 契约 | PASS |
+| P2-ERR-001 | Provider 错误屏蔽 | Integration | 注入 `PROVIDER_UNAVAILABLE` | 发起搜索 | 503 `DEPENDENCY_UNAVAILABLE`；可重试；不暴露内部错误/stack | PASS |
+| P2-DATA-001 | Scenario 与缺失语义 | Unit | A/B/C/D fixture | 校验场景、关系及 B/C 边界 | A/B/C/D 唯一；D 非杭州；`0/false/null/字段不存在` 可区分 | PASS |
+| P2-SEC-001 | 敏感信息签名扫描 | Static | 工程与配置存在 | 扫描常见云 Key、OpenAI/GitHub token、私钥和非空企业/微信 Secret | 未发现真实凭证签名；`.env` 与 runtime 已忽略 | PASS |
+| P2-PORT-001 | package scripts 可移植性 | Runtime | Node 已加入验证进程 PATH | 原样执行 `pnpm test`、`pnpm start` 并请求 Health | 测试 22/22；服务启动；scripts 无宿主绝对路径 | PASS |
+
+本阶段未执行且保持 `NOT EXECUTED`：微信开发者工具/真机、小程序页面、动态表单、Rule Engine、登录/Session、诊断、报告、顾问和 Admin。它们不属于 Phase 2。

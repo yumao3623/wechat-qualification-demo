@@ -1,0 +1,353 @@
+[
+  {
+    "id": "demo-a-001",
+    "scenario": "A",
+    "scenarioLabel": "数据完整优势型",
+    "name": "杭州市星澜智造 Demo 有限公司",
+    "subjectCode": "DEMO-A-001",
+    "legalRepresentative": "演示用户甲",
+    "establishedAt": "2022-06-01",
+    "registeredCapital": { "value": 10000000, "unit": "CNY" },
+    "registrationRegion": { "country": "CN", "province": "浙江省", "city": "杭州市", "district": "余杭区" },
+    "legalStatus": "active",
+    "industry": { "code": "DEMO-I65", "name": "软件和信息技术服务业" },
+    "fields": {
+      "residentEnterpriseStatus": {
+        "value": true,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "employeeCount": {
+        "value": 120,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "techEmployeeCount": {
+        "value": 34,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "rdEmployeeCount": {
+        "value": 28,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "salesRevenue": [
+        { "value": 19000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2023 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 23500000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 28000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
+      ],
+      "operatingRevenue": [
+        { "value": 23500000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 28000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
+      ],
+      "mainBusinessRevenue": {
+        "value": 24400000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "highTechRevenue": {
+        "value": 19000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "rdExpense": [
+        { "value": 2200000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2023 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 2800000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 3400000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
+      ],
+      "domesticRdExpense": {
+        "value": 3100000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "costExpense": {
+        "value": 20500000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "totalAssets": {
+        "value": 48000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year_end", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "totalLiabilities": {
+        "value": 15000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year_end", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "businessAbnormal": {
+        "value": false,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "seriousDishonesty": {
+        "value": false,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "intellectualProperties": {
+        "value": [
+          { "id": "DEMO-IP-A-01", "category": "invention_patent", "status": "granted", "selfDeveloped": true },
+          { "id": "DEMO-IP-A-02", "category": "utility_model", "status": "granted", "selfDeveloped": true },
+          { "id": "DEMO-IP-A-03", "category": "software_copyright", "status": "granted", "selfDeveloped": true },
+          { "id": "DEMO-IP-A-04", "category": "software_copyright", "status": "granted", "selfDeveloped": true }
+        ],
+        "unit": "items",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      }
+    },
+    "isDemoData": true,
+    "dataLabel": "虚构 Demo 数据",
+    "fetchedAt": "2026-08-10T00:00:00.000Z",
+    "provider": "mock"
+  },
+  {
+    "id": "demo-b-001",
+    "scenario": "B",
+    "scenarioLabel": "关键数据缺失型",
+    "name": "杭州市云舟微研 Demo 有限公司",
+    "subjectCode": "DEMO-B-001",
+    "legalRepresentative": "演示用户乙",
+    "establishedAt": "2023-03-15",
+    "registeredCapital": { "value": 5000000, "unit": "CNY" },
+    "registrationRegion": { "country": "CN", "province": "浙江省", "city": "杭州市", "district": "滨江区" },
+    "legalStatus": "active",
+    "industry": { "code": "DEMO-I73", "name": "研究和试验发展" },
+    "fields": {
+      "residentEnterpriseStatus": {
+        "value": true,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "employeeCount": {
+        "value": 45,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "rdEmployeeCount": null,
+      "operatingRevenue": null,
+      "intellectualProperties": null,
+      "businessAbnormal": {
+        "value": false,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "seriousDishonesty": null
+    },
+    "isDemoData": true,
+    "dataLabel": "虚构 Demo 数据",
+    "fetchedAt": "2026-08-10T00:00:00.000Z",
+    "provider": "mock"
+  },
+  {
+    "id": "demo-c-001",
+    "scenario": "C",
+    "scenarioLabel": "关键指标明显不足型",
+    "name": "杭州市青禾商贸 Demo 有限公司",
+    "subjectCode": "DEMO-C-001",
+    "legalRepresentative": "演示用户丙",
+    "establishedAt": "2018-11-20",
+    "registeredCapital": { "value": 2000000, "unit": "CNY" },
+    "registrationRegion": { "country": "CN", "province": "浙江省", "city": "杭州市", "district": "临平区" },
+    "legalStatus": "active",
+    "industry": { "code": "DEMO-I52", "name": "零售业" },
+    "fields": {
+      "residentEnterpriseStatus": {
+        "value": true,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "employeeCount": {
+        "value": 8,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "techEmployeeCount": {
+        "value": 0,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "rdEmployeeCount": {
+        "value": 0,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "salesRevenue": {
+        "value": 8000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "operatingRevenue": {
+        "value": 8000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "mainBusinessRevenue": {
+        "value": 5000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "rdExpense": {
+        "value": 0,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "totalAssets": {
+        "value": 6000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year_end", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "totalLiabilities": {
+        "value": 5200000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year_end", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "businessAbnormal": {
+        "value": false,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "seriousDishonesty": {
+        "value": false,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "intellectualProperties": {
+        "value": [],
+        "unit": "items",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      }
+    },
+    "isDemoData": true,
+    "dataLabel": "虚构 Demo 数据",
+    "fetchedAt": "2026-08-10T00:00:00.000Z",
+    "provider": "mock"
+  },
+  {
+    "id": "demo-d-001",
+    "scenario": "D",
+    "scenarioLabel": "杭州地域不匹配型",
+    "name": "宁波市远汐数科 Demo 有限公司",
+    "subjectCode": "DEMO-D-001",
+    "legalRepresentative": "演示用户丁",
+    "establishedAt": "2022-09-08",
+    "registeredCapital": { "value": 8000000, "unit": "CNY" },
+    "registrationRegion": { "country": "CN", "province": "浙江省", "city": "宁波市", "district": "鄞州区" },
+    "legalStatus": "active",
+    "industry": { "code": "DEMO-I65", "name": "软件和信息技术服务业" },
+    "fields": {
+      "residentEnterpriseStatus": {
+        "value": true,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "employeeCount": {
+        "value": 72,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "techEmployeeCount": {
+        "value": 20,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "rdEmployeeCount": {
+        "value": 15,
+        "unit": "people",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "salesRevenue": [
+        { "value": 22000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2023 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 27000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 32000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
+      ],
+      "operatingRevenue": [
+        { "value": 27000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 32000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
+      ],
+      "mainBusinessRevenue": {
+        "value": 28200000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "rdExpense": [
+        { "value": 2400000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2023 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 3000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 3500000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
+      ],
+      "totalAssets": {
+        "value": 42000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year_end", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "totalLiabilities": {
+        "value": 13000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year_end", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "businessAbnormal": {
+        "value": false,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "seriousDishonesty": {
+        "value": false,
+        "unit": "boolean",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "intellectualProperties": {
+        "value": [
+          { "id": "DEMO-IP-D-01", "category": "invention_patent", "status": "granted", "selfDeveloped": true },
+          { "id": "DEMO-IP-D-02", "category": "software_copyright", "status": "granted", "selfDeveloped": true },
+          { "id": "DEMO-IP-D-03", "category": "software_copyright", "status": "granted", "selfDeveloped": true }
+        ],
+        "unit": "items",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      }
+    },
+    "isDemoData": true,
+    "dataLabel": "虚构 Demo 数据",
+    "fetchedAt": "2026-08-10T00:00:00.000Z",
+    "provider": "mock"
+  }
+]

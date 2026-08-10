@@ -145,3 +145,20 @@
 - 状态：`ACCEPTED_FOR_DEMO`
 - 决策：Phase 1 以 `docs/architecture.md` 的 REST request/response/error、Session、诊断状态机及 Report/Evidence/Gap/Action/Lead schema 作为 Phase 2–4 实现契约。
 - 变更规则：后续若代码需要改变字段、枚举或状态转移，应先说明原因并同步更新 PRD、架构和相关测试，避免文档与实现漂移。
+
+## D-020 Phase 2 企业 fixture 与 Repository 落地
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：Phase 2 使用只读 `JsonEnterpriseRepository` 加载 Git 跟踪的四家虚构 fixture，再由 `MockEnterpriseProvider` 输出 canonical summary/profile；Route 只做输入解析和 HTTP 映射，并通过 `EnterpriseService` 调用可注入 Provider。
+- 多期字段：单一时点指标保存一个统一值对象；近两年/三年同名指标保存按年度升序的统一值对象数组，每个元素独立携带 `value/unit/period/source`。这是对 `architecture.md` 第 5、6 节未展开的多期存储方式的实现澄清，不改变 REST 模型语义。
+- 缺失语义：B 场景有意同时使用 `null` 和字段不存在表示未知；C 场景有意保存 `0` 和 `false` 表示已知零值/否。不得使用 truthy 判断缺失。
+- 真实 Provider：Phase 2 不创建可误认为已接通的 `QichachaEnterpriseProvider` 占位实现。配置为非 `mock` 时启动即明确拒绝；未来取得正式 API 授权后再按 D-005 与架构第 19 节实现。
+- Repository 边界：本阶段 Repository 只读 fixture 并缓存解析结果，不实现 runtime 写入；Session/诊断/报告/Lead 的原子 JSON Repository 留在其计划阶段。
+
+## D-021 Phase 2 package scripts 可移植性基线
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：`package.json` 的 `start` 固定使用 `node server/src/server.js`，`test` 固定使用 `node --test`；要求开发环境正常安装 Node.js >=20 并将 `node` 加入 PATH。
+- 禁止：不得把 Codex App bundled Node、Windows 用户目录或其他机器专用绝对路径写入 scripts、README 运行命令或项目代码。
+- 验证：2026-08-10 当前 Codex Shell 可直接找到 pnpm 11.16.0，但不能直接找到 bundled Node。仅对验证进程临时补齐 Node PATH 后，原样执行 `pnpm test` 为 22/22 PASS，原样执行 `pnpm start` 后 Health 返回 `ok` 且 Provider 为 `mock`。
+- 结论：直接运行时的 PATH 差异属于 Codex 宿主环境配置，不是项目级缺陷；不为适配该环境修改可移植 scripts。

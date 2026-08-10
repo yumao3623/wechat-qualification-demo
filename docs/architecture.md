@@ -162,7 +162,7 @@ EnterpriseProvider.getEnterpriseById({ enterpriseId, signal })
 }
 ```
 
-`fields` 使用第 5 节统一值模型，允许缺失。Provider 不能断言财务、研发、知识产权关联或政策合规结论。
+`fields` 使用第 5 节统一值模型，允许缺失。单一时点字段保存一个标准值对象；需要保留多个年度的同名指标（例如近三年 `salesRevenue`、`rdExpense`）时，保存按年度升序排列的标准值对象数组，数组中的每个元素都必须各自携带 `value/unit/period/source`。Provider 不能断言财务、研发、知识产权关联或政策合规结论。
 
 ### 6.4 Provider 错误
 
@@ -667,7 +667,7 @@ pending ──time/service──> processing ──all stages──> ready
 
 ## 16. Repository 与持久化
 
-Repository：`SessionRepository`、`AssessmentRepository`、`ReportRepository`、`LeadRepository`。每个接口提供按 ID、所属用户和必要列表查询；领域服务不直接读写文件。
+Repository：Phase 2 已实现只读 `EnterpriseRepository` / `JsonEnterpriseRepository`，由 Mock Provider 读取 fixture；后续阶段实现 `SessionRepository`、`AssessmentRepository`、`ReportRepository`、`LeadRepository`。每个接口提供按 ID、所属用户和必要列表查询；领域服务不直接读写文件。
 
 - fixture 与 runtime 分离；runtime 在 Git 忽略列表。
 - 写入使用临时文件 + 原子替换；写前校验 schema，损坏时返回可诊断错误且不覆盖原文件。
@@ -714,4 +714,3 @@ Repository：`SessionRepository`、`AssessmentRepository`、`ReportRepository`�
 - Phase 4 实现 Auth、Session、协议门、状态机、报告和 Lead API。
 - API 变更必须先更新本契约；字段或规则变更同步 PRD 和测试。
 - 未获得官方平台/审计/专家证据的定性项不得因实现便利从 `manual_review` 改为 `met`。
-
