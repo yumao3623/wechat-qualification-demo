@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜技术架构与接口契约
 
-> 文档版本：Phase 7 / v1.5
+> 文档版本：Phase 8 / v1.6
 > 规格日期：2026-08-10  
-> 当前边界：Phase 7 已在同一 Express 进程接入本地只读 Admin；Phase 2–6 的 Auth、Session、Consent、Diagnosis、Report、Lead 与 Rule Engine 契约未改变，小程序文件未修改。Phase 8 未开始。
+> 当前边界：Phase 8 最终集成与验收已完成；Auth、Session、Consent、Diagnosis、Report、Lead、Rule Engine 与本地只读 Admin 契约未改变。
 
 ## 1. 架构目标
 
@@ -850,3 +850,11 @@ contact-consultant（游客）→ POST /api/leads（独立告知、独立幂等�
 - 顾问页不读取或创建 Session，也不存在 `getPhoneNumber`、`getUserProfile` 或授权按钮。
 - 企业 ID 存在时先用企业详情 API 回填并由后端再次核对名称；无企业上下文可手填名称。
 - Lead 独立同意默认 `false`，提交时使用 `lead-privacy-2026-08-10`、`consultant_contact` 与独立幂等键；失败重试复用同一请求。
+
+## 23. Phase 8 集成与可移植性收口
+
+- `package.json` 保持可移植脚本：`pnpm start` → `node server/src/server.js`，`pnpm test` → `node --test`；没有用户目录或 Codex bundled Node 绝对路径。
+- 共享 `project.config.json` 固定 `miniprogramRoot=miniprogram/` 和 `appid=touristappid`。具体测试 AppID 属于本机私有配置，应写入被忽略的 `project.private.config.json`；AppSecret 永不进入前端或仓库。
+- 新增独立 Backend 子进程 E2E，使用临时 JSON runtime 验证 Health、企业/缺失字段、Auth/Consent/Diagnosis、状态流、Report/List、Lead、Admin 脱敏与 Logout 失效；结束后自动清理。
+- 动态补数将 Backend `supplements.fields.<key>` 跨字段错误映射到带年度的 `<key>.<year>` UI schema 字段，保持服务端业务校验为唯一依据并提供准确行内反馈。
+- JSON Repository 边界不变：只适合本地、单进程、低并发 Demo；Phase 8 不引入数据库、跨进程锁、事务或队列。

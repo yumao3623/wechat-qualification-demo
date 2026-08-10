@@ -1,6 +1,6 @@
 const { getMissingFields } = require('../../services/api');
 const { loadDraft, saveDraft } = require('../../services/draft');
-const { buildSupplements, hydrateRawValues, prepareField } = require('../../utils/form');
+const { buildSupplements, hydrateRawValues, mapServerFieldErrors, prepareField } = require('../../utils/form');
 const assessmentFlow = require('../../services/assessment-flow');
 
 Page({
@@ -65,11 +65,7 @@ Page({
       });
       wx.showToast({ title: '草稿已保存', icon: 'success' });
     } catch (error) {
-      const fieldErrors = {};
-      for (const item of error.fields || []) {
-        const matched = this.data.fields.find((field) => item.field.includes(field.key));
-        if (matched) fieldErrors[matched.key] = item.reason;
-      }
+      const fieldErrors = mapServerFieldErrors(this.data.fields, error.fields);
       this.setData({
         state: 'success',
         errors: fieldErrors,

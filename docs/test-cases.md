@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜测试用例与需求追踪
 
-> 文档版本：Phase 7 / v1.7
+> 文档版本：Phase 8 / v1.8
 > 规格日期：2026-08-10  
-> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 7 共 90 tests / 90 PASS，包含 Phase 2–6 的 85 项全量回归；真实 Backend 与本地浏览器已验证 Admin 的正常、Empty、Loading、Error。真机和专项异常/多尺寸仍保持 `NOT EXECUTED`，Phase 8 未开始。
+> 最近执行：2026-08-10，Node.js v24.19.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 8 共 92 tests / 92 PASS / 0 FAIL；包含 Phase 2–7 全量回归、独立 Backend 子进程完整 E2E和跨字段错误映射。用户使用测试 AppID 完成 14 项 DevTools 最终冒烟并全部 PASS。真机 HTTPS、弱网和专项多尺寸/键盘仍保持 `NOT EXECUTED`。
 
 ## 1. 状态与执行规则
 
@@ -448,3 +448,59 @@ Error：请求失败后两个区显示稳定中文 Backend 重试提示
 ```
 
 Phase 7 没有执行并保持 `NOT EXECUTED`：真机、Phase 6 已列出的专项故障/多尺寸/生命周期补充项，以及 Phase 8 最终集成硬化。Phase 7 完成后立即停止，不把这些未执行项写成通过。
+
+## 19. Phase 8 最终集成与验收记录
+
+自动与可移植性命令：
+
+```text
+pnpm install --frozen-lockfile
+pnpm start + GET /api/health
+pnpm test
+node --test tests/integration/api/phase8-startup-e2e.test.js tests/unit/miniprogram/phase5-frontend.test.js
+node --check <全部 97 个 JavaScript 文件>
+ConvertFrom-Json <全部 22 个 JSON 文件>
+git diff --check
+```
+
+最终结果：`pnpm install --frozen-lockfile` 无锁文件变更；`pnpm start` 实际启动后 Health 为 `ok`、Provider 为 `mock`；全量 92 tests / 92 PASS / 0 FAIL / 0 skipped / 0 todo。独立进程测试真实启动 `server/src/server.js`，使用独立临时 runtime 并在结束后清理。
+
+| Test ID | 模块 | 前置条件 | 操作步骤 | 预期/实际结果 | Status |
+| --- | --- | --- | --- | --- | --- |
+| P8-PORT-001 | 安装与脚本可移植性 | Node.js 24.19、pnpm 11.16 | frozen install；检查 package scripts、绝对路径和共享 AppID | 依赖一致；scripts 仅用 `node`；无用户目录绝对路径；共享 AppID 为 `touristappid` | PASS |
+| P8-STATIC-001 | JS/JSON/页面 | 当前仓库 | 语法检查、JSON 解析、13 页四件套、3 Tab 与注册路径检查 | 97 JS、22 JSON、13 页和 3 Tab 全部有效 | PASS |
+| P8-STATIC-002 | 登录/API 边界 | 当前小程序 | 扫描登录、请求和敏感授权 API | 登录 adapter 仅在 `services/auth.js`；`wx.request` 仅在 `services/api.js`；无手机号/用户资料授权 API | PASS |
+| P8-SCAN-001 | 合规与清理 | Git 跟踪文件 | 扫描 TODO/FIXME/占位、承诺文案、疑似凭证、runtime、日志、本机路径和大文件 | 实现中无命中；无被跟踪 runtime/私密配置/日志；无 >1MB 意外文件 | PASS |
+| P8-E2E-001 | 独立 Backend 主链路 | Mock Provider、Demo Auth、临时 runtime | Health → Search/Detail → Missing Fields → Auth/Consent/Diagnosis → pending/processing/ready → Report/List → Lead → Logout | 状态和 API 契约全部符合；旧 Session 返回 401 | PASS |
+| P8-E2E-002 | Report 完整性 | P8-E2E-001 ready | 读取报告 | 四类结果且 Evidence/Gap/Action 均非空 | PASS |
+| P8-ADMIN-001 | Admin 集成 | 同一临时 runtime 已有诊断与 Lead | 读取两个本机 Admin API | 各 1 条真实记录；完整手机号和 Session token 不出现；手机号脱敏 | PASS |
+| P8-MOCK-001 | A/B/C/D 最终状态 | 四家虚构 fixture | 全量 Engine/API 回归 | A 四类 opportunity；B 初始四类 needs_data 且补数可改变；C 四类 not_met 且 0/false 不算 missing；D 杭州新雏鹰 not_applicable | PASS |
+| P8-FORM-001 | 跨字段错误反馈 | Scenario B 总人数 45 | 研发人数填 100 并保存；修复后执行映射单测 | Backend 拒绝；“不能大于企业总人数”映射到 `rdEmployeeCount.2025` 行内错误，不保存非法草稿 | PASS |
+| P8-DEVTOOLS-001 | 最终微信开发者工具冒烟 | 本机测试 AppID、本地 Backend | 用户执行导入/编译、冷启动、三 Tab、游客链路、动态补数、协议拒绝/同意、登录、状态流、报告、顾问、Report Tab、退出、Console/Network | 14 项逐项反馈全部 PASS；使用测试 AppID，不是 touristappid 模拟登录 | PASS |
+| P8-GIT-001 | Git 交付检查 | Phase 8 修改完成 | status、diff、diff-check、跟踪文件与大文件检查 | 修改均在预期范围；无 runtime/秘密/大文件；diff-check 通过 | PASS |
+
+### 19.1 Requirement Traceability 最终结果
+
+| 原始要求 | 实现/验证证据 | 最终状态 |
+| --- | --- | --- |
+| 首页、企业搜索、主体确认、企业画像、补充经营数据免登录 | 原生页面 + Phase 5/6 DevTools PASS + 前端静态回归 | PASS |
+| 发起诊断先协议后登录；默认不勾选；拒绝仍可浏览 | AgreementDialog、Auth 时序测试、Phase 6 DevTools PASS | PASS |
+| 诊断进度、报告、Evidence、Gap/Action 登录保护 | Session/所有权 API 测试 + Phase 6 DevTools PASS + P8-E2E | PASS |
+| Contact Consultant 免登录且独立同意 | Lead API/UI 测试 + Phase 6 DevTools PASS + P8-E2E | PASS |
+| Report Tab 未登录引导和五态 | 前端单测 + Phase 6 DevTools 核心路径；专项 pending/failed UI 构造见未执行项 | PASS |
+| My Tab 免登录；使用说明、隐私政策、用户协议、免责声明；条件退出 | 页面/静态测试 + Phase 6 DevTools PASS | PASS |
+| 四类资质、动态缺失字段、可解释报告 | Engine/Report 单测、A/B/C/D 集成、P8-E2E | PASS |
+| Mock 数据虚构、`isDemoData`、不冒充企查查 | fixture/Provider/UI 标识测试与静态扫描 | PASS |
+| Admin 本机只读、诊断/脱敏 Lead、无敏感快照 | Phase 7 浏览器/API PASS + P8-ADMIN-001 | PASS |
+| PRD、design、architecture、test cases、decisions、README | Phase 8 同步收口 | PASS |
+| 可安装、可启动、可完整运行 Demo | frozen install、92 项测试、独立 Backend E2E、测试 AppID DevTools 最终冒烟 | PASS |
+
+### 19.2 Phase 8 仍未执行
+
+- 正式 AppID + 生产微信 `code2Session`：`NOT EXECUTED`（明确不属于 Demo 实现范围）。
+- 真机 HTTPS 合法域名：`NOT EXECUTED`。
+- 弱网/超时专项、登录/诊断/报告网络故障 UI 注入：`NOT EXECUTED`。
+- 窄屏、多尺寸、键盘遮挡和真实触控专项：`NOT EXECUTED`。
+- 前后台生命周期与轮询恢复专项人工复验：`NOT EXECUTED`。
+- 草稿真实等待 2 小时到期：`NOT EXECUTED`（自动 fake-time TTL 已 PASS）。
+- `docs/test-cases.md` 中仍标记 `NOT EXECUTED` 的细粒度 Provider 契约和政策边界扩展用例未在 Phase 8 补做；现有实现主链路不因此冒充这些专项已通过。

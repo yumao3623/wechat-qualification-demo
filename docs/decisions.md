@@ -268,3 +268,11 @@
 - 本地限制：静态页和 API 共用 loopback 地址门禁；远程请求返回 403。此设计只是降低本地 Demo 暴露面，不宣称具备生产身份、RBAC 或审计。
 - 最小字段：诊断只返回企业摘要、诊断/报告状态和时间；Lead 手机号在 Backend 脱敏，只返回展示需要的企业、联系人、方向、状态和时间。Session、token/hash、幂等 hash、Consent、输入快照和完整手机号均不出现在 Admin 响应。
 - 验证：Phase 7 自动测试覆盖空数据、真实持久化数据、非本地 403、安全错误、四态实现及脱敏；真实浏览器验证正常、Empty、Loading 与 Backend 断开 Error。小程序目录零修改。
+
+## D-035 Phase 8 共享 AppID 与最终验收基线
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 发现：共享 `project.config.json` 曾包含具体测试 AppID，但 README、架构与 D-028 均声明为 `touristappid`，形成可移植性和文档一致性缺陷；AppID 不是 AppSecret，但不应把共享仓库绑定到单一评审环境。
+- 决策：共享配置恢复为 `touristappid` 并由自动测试锁定；需要完整 `wx.login` 的评审方测试 AppID 写入已忽略的 `project.private.config.json`。既有 DevTools 人工验收事实继续保留，不推断其 AppID 类型。
+- 验收：Phase 8 最终基线为 92 tests / 92 PASS / 0 FAIL；新增独立 Backend 子进程 E2E、跨字段错误映射回归，并完成语法、JSON、路径、合规、敏感信息和 Git 静态检查。用户使用测试 AppID 完成 14 项 DevTools 最终冒烟并全部 PASS；真机/弱网/多尺寸/生命周期专项继续为 `NOT EXECUTED`。
+- 人工发现与修正：研发人数 100 大于 Scenario B 总人数 45 时，Backend 正确返回不带年度的字段路径，前端初版无法映射到 `rdEmployeeCount.2025`。Phase 8 以基础字段 key 安全匹配年度 schema，未放宽任何服务端业务关系校验。

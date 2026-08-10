@@ -82,11 +82,28 @@ function prepareField(field) {
   };
 }
 
+function mapServerFieldErrors(fields, serverErrors) {
+  const mapped = {};
+  for (const item of serverErrors || []) {
+    if (!item || typeof item.field !== 'string') continue;
+    const matched = fields.find((field) => {
+      const baseKey = field.key.replace(/\.\d{4}$/, '');
+      return item.field === field.key
+        || item.field.endsWith(`.${field.key}`)
+        || item.field === baseKey
+        || item.field.endsWith(`.${baseKey}`);
+    });
+    if (matched) mapped[matched.key] = item.reason;
+  }
+  return mapped;
+}
+
 module.exports = {
   buildMeasurement,
   buildSupplements,
   hydrateRawValues,
   isBlank,
+  mapServerFieldErrors,
   prepareField,
   validateRawValue
 };

@@ -7,6 +7,7 @@ const {
   buildMeasurement,
   buildSupplements,
   hydrateRawValues,
+  mapServerFieldErrors,
   prepareField,
   validateRawValue
 } = require('../../../miniprogram/utils/form');
@@ -105,10 +106,27 @@ test('API 错误映射保留用户文案、字段和 request ID，不暴露额�
   assert.equal(Object.hasOwn(error, 'internal'), false);
 });
 
+test('Backend 跨字段错误可映射到带年度的动态表单字段', () => {
+  const fields = [
+    { key: 'rdEmployeeCount.2025' },
+    { key: 'mainBusinessRevenue.2025' }
+  ];
+  assert.deepEqual(mapServerFieldErrors(fields, [
+    { field: 'supplements.fields.rdEmployeeCount', reason: '不能大于企业总人数' },
+    { field: 'supplements.fields.mainBusinessRevenue', reason: '不能大于营业收入' }
+  ]), {
+    'rdEmployeeCount.2025': '不能大于企业总人数',
+    'mainBusinessRevenue.2025': '不能大于营业收入'
+  });
+});
+
 test('Phase 6 app.json 页面成套存在，Tab 路径正确且敏感授权未引入', () => {
   const root = path.resolve(__dirname, '../../..');
   const mini = path.join(root, 'miniprogram');
+  const projectConfig = JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8'));
   const appConfig = JSON.parse(fs.readFileSync(path.join(mini, 'app.json'), 'utf8'));
+  assert.equal(projectConfig.miniprogramRoot, 'miniprogram/');
+  assert.equal(projectConfig.appid, 'touristappid');
   for (const page of appConfig.pages) {
     for (const extension of ['js', 'json', 'wxml', 'wxss']) {
       assert.equal(fs.existsSync(path.join(mini, `${page}.${extension}`)), true, `${page}.${extension} 不存在`);

@@ -2,7 +2,7 @@
   "description": "企业政府资质预评估微信小程序 Demo",
   "compileType": "miniprogram",
   "miniprogramRoot": "miniprogram/",
-  "appid": "wx859c5dd9f4c09741",
+  "appid": "touristappid",
   "projectname": "enterprise-qualification-precheck-demo",
   "setting": {
     "urlCheck": false,
