@@ -132,6 +132,26 @@ test('A/B/C/D 四个 Scenario 正确加载且数据关系一致', async () => {
     if (assets && liabilities) {
       assert.ok(liabilities.value <= assets.value);
     }
+
+    const highTechRevenue = enterprise.fields.highTechRevenue;
+    const totalRevenue = enterprise.fields.totalRevenue;
+    if (highTechRevenue && totalRevenue) {
+      assert.ok(highTechRevenue.value <= totalRevenue.value);
+      assert.equal(highTechRevenue.period.year, totalRevenue.period.year);
+    }
+
+    const rdExpenses = enterprise.fields.rdExpense;
+    const domesticRdExpenses = enterprise.fields.domesticRdExpense;
+    if (Array.isArray(rdExpenses) && Array.isArray(domesticRdExpenses)) {
+      assert.deepEqual(
+        domesticRdExpenses.map((item) => item.period.year),
+        rdExpenses.map((item) => item.period.year)
+      );
+      for (const domestic of domesticRdExpenses) {
+        const total = rdExpenses.find((item) => item.period.year === domestic.period.year);
+        assert.ok(domestic.value <= total.value);
+      }
+    }
   }
 
   const scenarioD = enterprises.find((item) => item.scenario === 'D');

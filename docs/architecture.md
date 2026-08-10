@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜技术架构与接口契约
 
-> 文档版本：Phase 1 / v1.0  
+> 文档版本：Phase 3 / v1.1
 > 规格日期：2026-08-10  
-> 当前边界：本文件是 Phase 2–4 的实现契约；Phase 1 不创建服务、页面、Repository 或 Rule Engine 代码。
+> 当前边界：本文件是 Phase 2–4 的实现契约；Phase 3 已实现独立 Rule Engine、动态字段、补数合并和 Report 领域对象，未实现 Phase 4 REST/Session/诊断流。
 
 ## 1. 架构目标
 
@@ -237,6 +237,15 @@ criterion `result` 只允许 `met | unmet | unknown | manual_review | not_applic
 ```
 
 schema 合并相同字段、保留全部 `requiredFor`，按阻塞性和填写成本排序。定性专家判断不变成强制长表单，而生成 `manual_review` evidence/action。
+
+### 7.4 Phase 3 实现细化
+
+- `QualificationEngine.buildAssessmentInput(profile, context)` 使用纯函数合并补充数据，`evaluate` 恰好调用四个 Evaluator，`getMissingFieldSchema` 合并各 Evaluator 声明的字段需求。
+- 补充字段使用 `sourceType="user"`（遵守第 5 节枚举）、`sourceLabel="user_supplied"` 和 `origin="user_supplied"`；统计年度必须与字段 key 一致。
+- 用户补充值与已有非空 Provider/Mock 值冲突时，保留原值与两个来源到 `fieldConflicts[]`，标记 `resolution="manual_review"`，不静默覆盖。
+- 动态字段 key 采用 `fieldName.year`（例如 `rdExpense.2025`）；实际合并后仍按第 6.3 节保存为单值或按年升序数组。
+- 汇总优先级严格为 `not_applicable → not_met → needs_data → opportunity → promising`。`manual_review` 是 criterion/evidence/gap 结果，不新增为总体 status。
+- A/D fixture 在 Phase 3 补齐了三年境内研发费用、高新收入分母与科技型中小企业研发评分口径，所有来源仍为 `demo_mock`，未伪装官方/商业数据。
 
 ## 8. REST 通用契约
 
@@ -575,6 +584,8 @@ pending ──time/service──> processing ──all stages──> ready
 ```
 
 `qualifications` 恰好包含四项且 `qualificationType` 唯一。报告是不可变快照；规则更新生成新版本，不修改历史报告。
+
+Phase 3 `ReportGenerator` 由调用方显式传入 `reportId/assessmentId/userId/generatedAt/ruleSetVersion`，不读全局时间，不做持久化。它还保存完整企业输入快照、稳定序列化后的 `sha256` 输入摘要，以及四项 `ruleVersions[]`；这些是对本节冻结结构的增补，不改变既有字段语义。
 
 ## 13. Evidence 数据结构
 

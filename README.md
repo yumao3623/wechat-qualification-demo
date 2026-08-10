@@ -1,14 +1,14 @@
 # 企业政府资质预评估微信小程序 Demo
 
-> 当前状态：Phase 2（工程骨架、Mock 企业与 Provider）已完成并通过本阶段自动测试与 HTTP 启动验证。尚未实现 Rule Engine、诊断、登录、正式小程序页面或 Admin，不能视为完整 Demo。
+> 当前状态：Phase 3（Rule Engine、动态字段与报告领域）已完成并通过本阶段自动测试。尚未实现 Session、诊断/Report REST、微信小程序页面或 Admin，不能视为完整 Demo。
 
 ## 项目简介
 
 这是一个招聘能力验证用微信小程序 Demo。最终目标是结合虚构企业画像和用户主动补充的经营数据，在约 1 分钟内对高新技术企业、科技型中小企业、专精特新中小企业和“雏鹰企业（杭州新雏鹰区域示例）”进行可解释预评估。
 
-本工具不是政府官方认定系统，不保证企业符合资质或获得补贴。Phase 2 只提供可运行后端、健康检查、虚构企业搜索与详情。
+本工具不是政府官方认定系统，不保证企业符合资质或获得补贴。Phase 3 提供可运行后端企业查询、独立资质预评估领域、动态缺失字段和 Report 对象生成；未对外暴露后三者的 REST API。
 
-## Phase 2 已实现
+## Phase 3 已实现
 
 - Node.js + Express 单进程 API 骨架、JSON body parser、request ID、统一错误处理。
 - `GET /api/health`。
@@ -16,13 +16,24 @@
 - 四家完全虚构、字段带来源/统计期/单位的 Demo 企业。
 - 企业关键词搜索、无结果、详情、404、基础输入校验和依赖错误屏蔽。
 - Node.js 内置 test runner 单元/集成测试。
+- `QualificationEngine` 与高企、科技型中小企业、专精特新、杭州新雏鹰四个显式 Evaluator。
+- 统一 `criteria/evidence/missingFields/gaps/actions/ruleVersion/applicableRegion` 结果。
+- 基于 Evaluator 字段需求的动态 schema，支持统计期/单位校验和地域裁剪。
+- 纯领域用户补数合并：`sourceType=user` + `sourceLabel=user_supplied`，冲突不静默覆盖。
+- `ReportGenerator` 生成不可变快照结构、输入 SHA-256、四类证据/缺口/行动与规则版本。
 
-本阶段没有创建 `miniprogram/`：按 `PLAN.md`，正式小程序游客页面从 Phase 5 开始。也没有创建 Qualification Engine/Evaluator、动态表单、Session、报告或 Admin。
+本阶段没有创建 `miniprogram/`：按 `PLAN.md`，正式小程序游客页面从 Phase 5 开始。也没有实现 Session、诊断/Report REST、报告列表、顾问 API 或 Admin。
 
 ## 技术架构
 
 ```text
 HTTP Route → EnterpriseService → EnterpriseProvider → EnterpriseRepository → Mock JSON
+
+EnterpriseProfile + SupplementalData
+  → QualificationEngine
+    → 4 Evaluators → Evidence / Gap / Action
+    → MissingFieldSchema
+    → ReportGenerator → Report 快照
 ```
 
 - 后端：Node.js 20+、Express 5、CommonJS JavaScript。
@@ -30,7 +41,7 @@ HTTP Route → EnterpriseService → EnterpriseProvider → EnterpriseRepository
 - 测试：Node.js 内置 test runner；不引入额外测试框架。
 - 数据：Git 跟踪的虚构 fixture；当前没有 runtime 业务数据写入。
 
-详细契约见 [docs/architecture.md](docs/architecture.md)。
+领域链路不依赖 Express、微信 API、Repository 或全局时间。详细契约见 [docs/architecture.md](docs/architecture.md)。
 
 ## 项目结构（当前实际）
 
@@ -45,6 +56,9 @@ HTTP Route → EnterpriseService → EnterpriseProvider → EnterpriseRepository
 │   │   ├── server.js
 │   │   ├── config.js
 │   │   ├── domain/enterprise/
+│   │   ├── domain/qualification/
+│   │   ├── domain/dynamic-form/
+│   │   ├── domain/report/
 │   │   ├── middleware/
 │   │   ├── repositories/
 │   │   ├── routes/
@@ -52,6 +66,9 @@ HTTP Route → EnterpriseService → EnterpriseProvider → EnterpriseRepository
 │   └── data/fixtures/mock-enterprises.json
 ├── tests/
 │   ├── unit/enterprise/
+│   ├── unit/qualification/
+│   ├── unit/dynamic-form/
+│   ├── unit/report/
 │   └── integration/api/
 └── docs/
 ```
@@ -60,7 +77,7 @@ HTTP Route → EnterpriseService → EnterpriseProvider → EnterpriseRepository
 
 - Node.js 20 或更高版本
 - npm（随 Node.js 提供）或 pnpm
-- Phase 2 不需要微信开发者工具、企查查 Key、微信 AppSecret 或数据库
+- Phase 3 不需要微信开发者工具、企查查 Key、微信 AppSecret 或数据库
 
 本阶段实际验证环境：Windows、Node.js v24.14.0、pnpm v11.16.0。
 
@@ -92,7 +109,7 @@ PORT=3000
 ENTERPRISE_PROVIDER=mock
 ```
 
-`.env.example` 中的企查查和微信变量只预留名称，值为空。真实 Key/Secret 不得提交；`.env` 已被 Git 忽略。Phase 2 仅支持 `mock`，设置其他 Provider 会明确拒绝启动。
+`.env.example` 中的企查查和微信变量只预留名称，值为空。真实 Key/Secret 不得提交；`.env` 已被 Git 忽略。Phase 3 仍仅支持 `mock`，设置其他 Provider 会明确拒绝启动。
 
 ## 启动 Backend
 
@@ -153,21 +170,22 @@ pnpm test
 npm test
 ```
 
-Phase 2 最近结果：22 tests，22 PASS，0 FAIL。覆盖 Provider、fixture 关系、四个 Scenario、HTTP API、cursor 分页、JSON body parsing、输入边界、404/503、错误屏蔽和 Route/Provider 注入解耦。真实记录见 [docs/test-cases.md](docs/test-cases.md)。
+Phase 3 最近结果：47 tests，47 PASS，0 FAIL。包含 Phase 2 全量回归，并覆盖四个 Evaluator、A/B/C/D、门槛边界、`manual_review`、地域不适用、动态字段、`0/false/null`、统计期/单位、补数合并、证据/缺口/行动、Report 生成和原对象不变性。真实记录见 [docs/test-cases.md](docs/test-cases.md)。
 
 ## 微信开发者工具导入
 
-`NOT EXECUTED`。Phase 2 计划不包含小程序项目骨架或正式页面；`project.config.json` 与 `miniprogram/` 将按后续阶段创建并实际验证。当前请勿把仓库作为可运行小程序导入。
+`NOT EXECUTED`。Phase 3 计划不包含小程序项目骨架或正式页面；`project.config.json` 与 `miniprogram/` 将按后续阶段创建并实际验证。当前请勿把仓库作为可运行小程序导入。
 
-## 当前演示流程
+## 当前可验证流程
 
-Phase 2 可演示：启动 API → Health Check → 搜索四家虚构企业 → 查看企业详情 → 验证错误响应。
+Phase 3 可验证：启动 API → Health Check → 搜索/查看四家虚构企业；通过自动测试调用 Engine → 计算动态缺失 → 合并用户补数 → 重新评估 → 生成 Report 对象。
 
 完整的小程序主流程仍是后续阶段目标，目前 `NOT EXECUTED`。
 
 ## 已知限制
 
-- 只有企业查询能力，没有 Rule Engine、动态补数、Session、诊断、报告、顾问或 Admin。
+- Rule Engine、动态补数和 Report 目前只是领域层，尚无 REST、持久化、Session、异步诊断、顾问或 Admin。
+- A 场景四类结果为 `opportunity`，因审计、官方平台、专家及材料真实性不能被 Mock 数据自动确认；不为演示效果将它们改为 `met`。
 - Mock 数据只为演示产品分支，不代表真实企业，不具备官方或商业数据可信度。
 - JSON fixture Repository 当前只读且面向单进程 Demo。
 - 本阶段未在 Node.js 20 的独立机器复测；实际运行环境是满足 `>=20` 约束的 Node.js 24.14.0。

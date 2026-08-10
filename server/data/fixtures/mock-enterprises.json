@@ -62,10 +62,21 @@
         { "value": 2800000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
         { "value": 3400000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
       ],
-      "domesticRdExpense": {
-        "value": 3100000,
+      "domesticRdExpense": [
+        { "value": 2000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2023 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 2500000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 3100000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
+      ],
+      "totalRevenue": {
+        "value": 28000000,
         "unit": "CNY",
         "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "rdScoringMethod": {
+        "value": "sales_revenue",
+        "unit": "enum",
+        "period": { "type": "as_of", "date": "2026-08-10" },
         "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
       },
       "costExpense": {
@@ -305,11 +316,34 @@
         "period": { "type": "fiscal_year", "year": 2025 },
         "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
       },
+      "highTechRevenue": {
+        "value": 22000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
+      "totalRevenue": {
+        "value": 32000000,
+        "unit": "CNY",
+        "period": { "type": "fiscal_year", "year": 2025 },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
       "rdExpense": [
         { "value": 2400000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2023 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
         { "value": 3000000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
         { "value": 3500000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
       ],
+      "domesticRdExpense": [
+        { "value": 2200000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2023 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 2700000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2024 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } },
+        { "value": 3200000, "unit": "CNY", "period": { "type": "fiscal_year", "year": 2025 }, "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" } }
+      ],
+      "rdScoringMethod": {
+        "value": "sales_revenue",
+        "unit": "enum",
+        "period": { "type": "as_of", "date": "2026-08-10" },
+        "source": { "sourceType": "demo_mock", "sourceLabel": "虚构 Demo 企业画像", "observedAt": "2026-08-10T00:00:00.000Z", "confidence": "demo" }
+      },
       "totalAssets": {
         "value": 42000000,
         "unit": "CNY",

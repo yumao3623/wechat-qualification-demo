@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜测试用例与需求追踪
 
-> 文档版本：Phase 2 / v1.1
+> 文档版本：Phase 3 / v1.2
 > 规格日期：2026-08-10  
-> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider。Phase 2 只更新实际执行覆盖到的用例；Phase 3 及之后用例继续保持 `NOT EXECUTED`。
+> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider。Phase 3 只更新实际执行覆盖到的领域用例；Session、诊断/Report API、小程序、Admin 与 E2E 继续保持 `NOT EXECUTED`。
 
 ## 1. 状态与执行规则
 
@@ -46,15 +46,15 @@
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FORM-001 | 缺失字段计算 | Unit | 规则需收入/研发/人数，画像已有收入 | 生成 schema | 只返回研发和人数相关缺失项；`requiredFor` 完整 | NOT EXECUTED |
-| FORM-002 | 字段合并 | Unit | 多类规则需要同一年度研发费用 | 生成 schema | 只出现一个字段，合并所有 rule ID | NOT EXECUTED |
-| FORM-003 | `0`/`false` 边界 | Unit | 字段值分别为 0、false | 计算缺失 | 两者不被当作缺失；仍可被规则判定未满足 | NOT EXECUTED |
-| FORM-004 | 无效期间 | Unit | 有 2024 值但规则需要 2025 | 计算缺失 | 标记 `invalid_period` 并要求 2025 值，不误用旧数据 | NOT EXECUTED |
+| FORM-001 | 缺失字段计算 | Unit | 规则需收入/研发/人数，画像已有收入 | 生成 schema | 只返回研发和人数相关缺失项；`requiredFor` 完整 | PASS |
+| FORM-002 | 字段合并 | Unit | 多类规则需要同一年度研发费用 | 生成 schema | 只出现一个字段，合并所有 rule ID | PASS |
+| FORM-003 | `0`/`false` 边界 | Unit | 字段值分别为 0、false | 计算缺失 | 两者不被当作缺失；仍可被规则判定未满足 | PASS |
+| FORM-004 | 无效期间 | Unit | 有 2024 值但规则需要 2025 | 计算缺失 | 标记 `invalid_period` 并要求 2025 值，不误用旧数据 | PASS |
 | FORM-005 | 单位错误 | Unit/API | 金额字段单位缺失或错误 | 请求 missing-fields/提交补数 | 返回 422 或字段错误，不进入评估 | NOT EXECUTED |
-| FORM-006 | 地域裁剪 | Unit | 企业注册地非杭州 | 生成 schema | 不为杭州新雏鹰单独询问字段；该资质预期不适用 | NOT EXECUTED |
+| FORM-006 | 地域裁剪 | Unit | 企业注册地非杭州 | 生成 schema | 不为杭州新雏鹰单独询问字段；该资质预期不适用 | PASS |
 | FORM-007 | 动态页面渲染 | DevTools E2E | B 场景 | 进入补充页 | 只渲染服务端 schema；标签、单位、期间、用途、帮助可见 | NOT EXECUTED |
-| FORM-008 | 补数影响结果 | Integration/E2E | B 场景初始缺研发数据 | 记录初始 missing；补齐有效值；重新评估 | 缺失 schema 减少，报告 criterion/总体状态按规则真实变化 | NOT EXECUTED |
-| FORM-009 | 数据冲突 | Unit/E2E | Provider 与用户给出不同非空值 | 提交补充 | 保留两个来源并要求确认/人工核验，不静默覆盖 | NOT EXECUTED |
+| FORM-008 | 补数影响结果 | Integration/E2E | B 场景初始缺研发数据 | 记录初始 missing；补齐有效值；重新评估 | 缺失 schema 减少，报告 criterion/总体状态按规则真实变化 | PASS |
+| FORM-009 | 数据冲突 | Unit/E2E | Provider 与用户给出不同非空值 | 提交补充 | 保留两个来源并要求确认/人工核验，不静默覆盖 | PASS |
 | FORM-010 | 草稿 TTL | Frontend unit/E2E | 已保存敏感草稿 | 模拟未过期、过期、创建成功、退出 | 未过期可恢复；过期/成功/退出后清理；日志无草稿 | NOT EXECUTED |
 
 ## 5. 协议、登录与 Session
@@ -95,42 +95,42 @@
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| RULE-COMMON-001 | Engine 纯度 | Unit | 标准 profile/context | 在无 HTTP/UI/filesystem 下调用 | 输出确定、可序列化；不读全局时间 | NOT EXECUTED |
-| RULE-COMMON-002 | 统一结构 | Unit | A/B/C/D | 评估四类 | 每类含 status/criteria/evidence/missing/gaps/actions/ruleVersion；criterion 字段完整 | NOT EXECUTED |
-| RULE-COMMON-003 | 汇总优先级 | Unit | 构造不适用、硬失败、缺失、人工核验、全预筛通过 | 评估 | 依 `not_applicable→not_met→needs_data→opportunity→promising` 规则归并 | NOT EXECUTED |
-| RULE-H-001 | 高企成立年限边界 | Unit | 成立 364、365、366 日 | 评估 H-02 | 364 unmet；365/366 met | NOT EXECUTED |
+| RULE-COMMON-001 | Engine 纯度 | Unit | 标准 profile/context | 在无 HTTP/UI/filesystem 下调用 | 输出确定、可序列化；不读全局时间 | PASS |
+| RULE-COMMON-002 | 统一结构 | Unit | A/B/C/D | 评估四类 | 每类含 status/criteria/evidence/missing/gaps/actions/ruleVersion；criterion 字段完整 | PASS |
+| RULE-COMMON-003 | 汇总优先级 | Unit | 构造不适用、硬失败、缺失、人工核验、全预筛通过 | 评估 | 依 `not_applicable→not_met→needs_data→opportunity→promising` 规则归并 | PASS |
+| RULE-H-001 | 高企成立年限边界 | Unit | 成立 364、365、366 日 | 评估 H-02 | 364 unmet；365/366 met | PASS |
 | RULE-H-002 | 高企研发比例档位 | Unit | 最近收入在 5000万、2亿边界及各比例上下 | 评估 H-06 | 含边界按 5%/4%/3% 正确；境内占比另行判断 | NOT EXECUTED |
 | RULE-H-003 | 高企人员/收入比例 | Unit | 同期人数与高新收入值 | 评估 H-05/H-07 | 10%、60% 边界正确；期间不同返回 unknown | NOT EXECUTED |
-| RULE-H-004 | 高企人工核验 | Unit | 有 IP/领域/创新材料但无专家结论 | 评估 H-03/H-04/H-08 | 产品关联、领域归属、创新能力为 `manual_review`，不自动 met | NOT EXECUTED |
-| RULE-T-001 | 科技型中小企业规模门槛 | Unit | 500人、2亿元收入/资产及超出值 | 评估 T-02 | 等于上限 met；超出任一关键门槛 unmet | NOT EXECUTED |
-| RULE-T-002 | 科技人员分档 | Unit | 30/25/20/15/10% 及略低 | 计算 T-06 | 分档分数与官方边界一致；<10% 得 0 | NOT EXECUTED |
-| RULE-T-003 | 研发二选一评分 | Unit | 两种口径均有值 | 明确选择收入/成本口径 | 只按选定合法口径计分；未选择时 unknown，不取更高值猜测 | NOT EXECUTED |
+| RULE-H-004 | 高企人工核验 | Unit | 有 IP/领域/创新材料但无专家结论 | 评估 H-03/H-04/H-08 | 产品关联、领域归属、创新能力为 `manual_review`，不自动 met | PASS |
+| RULE-T-001 | 科技型中小企业规模门槛 | Unit | 500人、2亿元收入/资产及超出值 | 评估 T-02 | 等于上限 met；超出任一关键门槛 unmet | PASS |
+| RULE-T-002 | 科技人员分档 | Unit | 30/25/20/15/10% 及略低 | 计算 T-06 | 分档分数与官方边界一致；<10% 得 0 | PASS |
+| RULE-T-003 | 研发二选一评分 | Unit | 两种口径均有值 | 明确选择收入/成本口径 | 只按选定合法口径计分；未选择时 unknown，不取更高值猜测 | PASS |
 | RULE-T-004 | 科技成果分档/关联 | Unit | I/II 类不同数量 | 评估 T-08 | 数量分档正确；产品关联/无争议无证据时保留 manual_review | NOT EXECUTED |
 | RULE-T-005 | 直接确认条件 | Unit | 四类直接确认材料分别存在 | 评估 T-09 | 有可核验证据可走直接确认预筛；仅用户声明为 manual_review | NOT EXECUTED |
 | RULE-T-006 | 2026 实地核查触发 | Unit | ≤5人、IP=0、研发<10万、首次参评 | 评估 T-10 | 生成 manual_review/action，不把触发本身判为 unmet | NOT EXECUTED |
 | RULE-S-001 | 2026 版本门 | Unit | 评估日在 2026-04-01 前/后 | 选择规则版本 | 之后使用工信部企业〔2026〕2号；旧证书按到期过渡，不用旧标准评新申请 | NOT EXECUTED |
 | RULE-S-002 | 专精特新财务门槛 | Unit | 营收/融资 OR、主营占比、负债率边界 | 评估 S-04 | OR 与 1500万/2000万、80%、80% 边界正确；投资者/实缴为 manual_review | NOT EXECUTED |
-| RULE-S-003 | 专精特新两年研发 | Unit | 两年各 100万和3%边界、一年不满足 | 评估 S-05 | 两年均满足才通过数值预筛；任一年明确不足为 unmet | NOT EXECUTED |
+| RULE-S-003 | 专精特新两年研发 | Unit | 两年各 100万和3%边界、一年不满足 | 评估 S-05 | 两年均满足才通过数值预筛；任一年明确不足为 unmet | PASS |
 | RULE-S-004 | 专精特新 IP/豁免 | Unit | I 类 IP、奖项/研发机构不同证据 | 评估 S-06 | 关联/应用/效益及豁免真实性为 manual_review；不凭数量直接 met | NOT EXECUTED |
-| RULE-S-005 | 市场地位 | Unit | 用户填写市场份额/排名但无权威证据 | 评估 S-07 | 固定 `manual_review`，不得推定“靠前/有影响力” | NOT EXECUTED |
-| RULE-S-006 | 平台质量评分 | Unit | 无得分、自报 50、附官方平台 50 | 评估 S-08 | 无/纯自报为 manual_review；有可核验平台结果按新申请边界预筛 | NOT EXECUTED |
-| RULE-E-001 | 杭州地域 | Unit | 杭州/非杭州企业 | 评估 E-00 | 杭州继续；非杭州 `not_applicable`，不询问专属字段 | NOT EXECUTED |
-| RULE-E-002 | 新雏鹰有效期 | Unit | 2027-12-31 与 2028-01-01 | 评估 E-00 | 到有效期当日按规则；之后未复核新文件则 not_applicable/manual action | NOT EXECUTED |
+| RULE-S-005 | 市场地位 | Unit | 用户填写市场份额/排名但无权威证据 | 评估 S-07 | 固定 `manual_review`，不得推定“靠前/有影响力” | PASS |
+| RULE-S-006 | 平台质量评分 | Unit | 无得分、自报 50、附官方平台 50 | 评估 S-08 | 无/纯自报为 manual_review；有可核验平台结果按新申请边界预筛 | PASS |
+| RULE-E-001 | 杭州地域 | Unit | 杭州/非杭州企业 | 评估 E-00 | 杭州继续；非杭州 `not_applicable`，不询问专属字段 | PASS |
+| RULE-E-002 | 新雏鹰有效期 | Unit | 2027-12-31 与 2028-01-01 | 评估 E-00 | 到有效期当日按规则；之后未复核新文件则 not_applicable/manual action | PASS |
 | RULE-E-003 | 新雏鹰比例/IP | Unit | 20%、10%、核心 IP/PCT 边界 | 评估 E-03/E-04 | 数量和比例正确；自研/类别/证据为 manual_review | NOT EXECUTED |
 | RULE-E-004 | 新雏鹰三选一 | Unit | 人才奖项、研发投入、融资分别满足/缺证据 | 评估 E-05 | OR 逻辑正确；金额可预筛，资质/实缴/归集保留 manual_review | NOT EXECUTED |
 | RULE-E-005 | 未来产业与官方评审 | Unit | 用户选择未来产业 | 评估 E-02/E-07 | 领域归类和最终综合评审均 `manual_review` | NOT EXECUTED |
-| RULE-MOCK-001 | A/B/C/D 目标覆盖 | Unit | 四家基准企业 | 完整评估 | A 多项较有希望；B 需补数据；C 关键项暂不满足；D 新雏鹰不适用 | NOT EXECUTED |
+| RULE-MOCK-001 | A/B/C/D 目标覆盖 | Unit | 四家基准企业 | 完整评估 | A 数值无明确硬失败但人工核验使总体为 opportunity；B 需补数据；C 关键项暂不满足；D 新雏鹰不适用 | PASS |
 
 ## 8. 报告、证据、缺口与行动
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| RPT-001 | 报告生成 | Unit/Integration | 四类结果存在 | 生成 Report | 恰好四类；保存输入 hash、规则版本、生成时间和免责声明 | NOT EXECUTED |
+| RPT-001 | 报告生成 | Unit/Integration | 四类结果存在 | 生成 Report | 恰好四类；保存输入 hash、规则版本、生成时间和免责声明 | PASS |
 | RPT-002 | 报告不可变 | Integration | 已生成报告后更新规则 | 再查旧报告 | 旧报告规则/结果不变；新诊断使用新版本 | NOT EXECUTED |
 | RPT-003 | 报告权限 | Integration | 用户 A/B | B 查询 A 的报告 | 404 且无摘要泄露 | NOT EXECUTED |
 | RPT-004 | 报告列表 | Integration | 当前用户有 ready/processing/failed | GET `/reports` | 只返回本人摘要、分页和正确状态 | NOT EXECUTED |
 | RPT-005 | 报告详情 UI | DevTools E2E | ready 报告 | 打开报告 | 四类卡、规则日期/地域、manual_review 数量、免责声明和入口可见 | NOT EXECUTED |
-| EVD-001 | Evidence 完整性 | Unit | 各类 criterion | 生成 evidence | 每项有 ruleId、criterion、requirement、actualValue/source/result/missing/explanation/action/policyRef | NOT EXECUTED |
+| EVD-001 | Evidence 完整性 | Unit | 各类 criterion | 生成 evidence | 每项有 ruleId、criterion、requirement、actualValue/source/result/missing/explanation/action/policyRef | PASS |
 | EVD-002 | 缺失与零值展示 | Unit/UI | 一项 null、一项 0 | 展示证据 | null 显示未提供且 missing 非空；0 显示为 0 | NOT EXECUTED |
 | EVD-003 | 派生值追溯 | Unit/UI | 比例 criterion | 展示 evidence | 可见分子、分母、公式、单位和同一统计期 | NOT EXECUTED |
 | GAP-001 | Gap 生成 | Unit | unmet/unknown/manual/conflict | 生成 gaps | 类型、影响、优先级、关联 evidence 和 missingFields 正确 | NOT EXECUTED |
@@ -257,3 +257,33 @@ node --test
 | P2-PORT-001 | package scripts 可移植性 | Runtime | Node 已加入验证进程 PATH | 原样执行 `pnpm test`、`pnpm start` 并请求 Health | 测试 22/22；服务启动；scripts 无宿主绝对路径 | PASS |
 
 本阶段未执行且保持 `NOT EXECUTED`：微信开发者工具/真机、小程序页面、动态表单、Rule Engine、登录/Session、诊断、报告、顾问和 Admin。它们不属于 Phase 2。
+
+## 14. Phase 3 执行记录
+
+自动测试命令（Codex 桌面验证进程使用 bundled Node；项目脚本仍为可移植的 `node --test`）：
+
+```text
+node --test
+```
+
+结果：47 tests，47 PASS，0 FAIL，0 skipped。其中包含 Phase 2 的 22 项全量回归。
+
+Phase 3 新增并实际执行的领域覆盖：
+
+| Test ID | Module | Type | Precondition | Steps | Expected | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| P3-RULE-001 | 四类 Evaluator | Unit | A/B/C/D fixture + 固定 context | 独立调用四个 Evaluator/Engine | 恰好四类、统一结构、版本/地域完整 | PASS |
+| P3-RULE-002 | 门槛边界 | Unit | 成立日、规模、评分档、两年研发边界 | 执行 H/T/S/E 对应规则 | 边界取等和超限结果符合冻结规格 | PASS |
+| P3-RULE-003 | 人工核验 | Unit | 无审计/平台/专家结论 | 评估定性与官方证据项 | 保留 `manual_review`，不伪造 met/平台分数 | PASS |
+| P3-MOCK-001 | Scenario A | Unit | 完整优势型 | 执行四类评估 | 四类均 `opportunity`，无 missing/硬失败，保留人工核验 | PASS |
+| P3-MOCK-002 | Scenario B | Unit | 关键数据缺失型 | 初次评估、以用户来源补齐、再评估 | 初始四类 `needs_data`；schema 20 项；补齐后 schema 0 且转 `opportunity` | PASS |
+| P3-MOCK-003 | Scenario C | Unit | `0/false/空 IP` 已知 | 执行四类评估 | 四类 `not_met`；0/false 不被当 missing | PASS |
+| P3-MOCK-004 | Scenario D | Unit | 宁波企业 | 评估杭州新雏鹰并生成 schema | `not_applicable`；不询问杭州专属字段 | PASS |
+| P3-FORM-001 | Dynamic Missing Fields | Unit | 多 Evaluator 重复需求 | 计算、合并、排序 schema | 按规则需求减已知有效值；`requiredFor` 合并 | PASS |
+| P3-FORM-002 | 缺失语义 | Unit | `0/false/null/undefined`、错期间/单位 | 计算 schema | 0/false 已知；null/undefined 缺失；口径错误有稳定原因 | PASS |
+| P3-MERGE-001 | 用户补充合并 | Unit | 缺失字段和已有字段 | 合并补充值 | `user/user_supplied`、保留统计期；冲突不覆盖并交人工核验 | PASS |
+| P3-EVD-001 | Evidence/Gap/Action | Unit | met/unmet/unknown/manual 结果 | 生成统一领域输出 | Evidence 字段完整；缺口/行动关联；建议无承诺 | PASS |
+| P3-RPT-001 | Report Domain | Unit | 四类结果与输入快照 | 生成 Report | 四类唯一；企业快照/hash/规则/证据/缺口/行动/时间/免责声明完整 | PASS |
+| P3-PURE-001 | 纯度与不变性 | Unit | 冻结 profile/context | 连续评估并对比原对象 | 输出确定；原企业/fixture 对象未被修改 | PASS |
+
+Phase 3 未执行并保持 `NOT EXECUTED`：Session/Auth、协议门、诊断 REST/状态机、Report REST/列表/权限、顾问 API、小程序/DevTools/真机 E2E、Admin。它们属于 Phase 4 及之后。

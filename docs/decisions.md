@@ -162,3 +162,19 @@
 - 禁止：不得把 Codex App bundled Node、Windows 用户目录或其他机器专用绝对路径写入 scripts、README 运行命令或项目代码。
 - 验证：2026-08-10 当前 Codex Shell 可直接找到 pnpm 11.16.0，但不能直接找到 bundled Node。仅对验证进程临时补齐 Node PATH 后，原样执行 `pnpm test` 为 22/22 PASS，原样执行 `pnpm start` 后 Health 返回 `ok` 且 Provider 为 `mock`。
 - 结论：直接运行时的 PATH 差异属于 Codex 宿主环境配置，不是项目级缺陷；不为适配该环境修改可移植 scripts。
+
+## D-022 Phase 3 统一领域结果与安全汇总
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：Phase 3 以 `architecture.md` 的总体状态 `promising | opportunity | needs_data | not_met | not_applicable` 和 criterion 结果 `met | unmet | unknown | manual_review | not_applicable` 为唯一领域枚举；不将 `manual_review` 增加为总体 status。
+- 汇总：地域/版本不适用优先，其次是明确硬门槛失败、关键缺数据、人工核验，最后才是无明确缺口的预筛良好。
+- A 场景实际结果：四类均为 `opportunity`，而非 Phase 0 早期示意的多项 `promising`。原因是高企领域/综合评分、科技型中小企业证据口径、专精特新平台/市场地位、新雏鹰产业/综合评审均不能由 Mock 结构化数据安全确认。
+- 原因：不为演示效果把审计、官方平台、专家或材料真实性偷偷当作 `met`。A 仍是“数值较完整、无明确硬失败”的积极演示场景。
+- 公开评分复核：Phase 3 实现时再次查阅科技部有效文件国科发政〔2017〕115号；科技人员指标满分 20，分档为 20/16/12/8/4/0，研发投入满分 50，科技成果满分 30。实现与正式文本一致，不使用记忆中的非官方分值。
+
+## D-023 Phase 3 补充数据与 fixture 完整性
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：用户补充使用第 5 节冻结的 `sourceType=user`，并额外保存 `sourceLabel=user_supplied` / `origin=user_supplied`以明确区分来源。与已有非空 Provider/Mock 值冲突时不覆盖，记入 `fieldConflicts[]` 并交人工核验。
+- fixture 更新：A/D 完整场景补齐三年 `domesticRdExpense`、`totalRevenue`、`highTechRevenue`（D）及 `rdScoringMethod`，用于避免把“完整场景”误做成缺数据场景。
+- 数据边界：新增值仍是虚构 `demo_mock`，没有改成 `official_platform/official_registry`，不表示真实官方证据。B 继续使用 `null`/字段不存在，C 继续使用 `0/false/空数组`。
