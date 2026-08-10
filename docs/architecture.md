@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜技术架构与接口契约
 
-> 文档版本：Phase 6 / v1.4
+> 文档版本：Phase 7 / v1.5
 > 规格日期：2026-08-10  
-> 当前边界：Phase 6 已在原生小程序接通 Phase 4 冻结的 Demo Auth、Session、Consent Gate、诊断、Report 与 Lead API。后端契约和 Rule Engine 未改变；Admin 仍未实现并留在 Phase 7。自动测试、真实 HTTP 联调及微信开发者工具 30 项核心人工验收均通过；真机和专项异常验证尚未执行。
+> 当前边界：Phase 7 已在同一 Express 进程接入本地只读 Admin；Phase 2–6 的 Auth、Session、Consent、Diagnosis、Report、Lead 与 Rule Engine 契约未改变，小程序文件未修改。Phase 8 未开始。
 
 ## 1. 架构目标
 
@@ -481,6 +481,9 @@ Phase 4 的报告列表以当前用户的 Assessment 为主记录并关联已生
 - `/api/admin/assessments` 返回企业、诊断 ID/状态/创建时间/报告状态。
 - `/api/admin/leads` 默认返回脱敏手机号；不提供编辑、导出、删除或派单 API。
 - UI 必须标明本地 Demo，不把限制方案描述为生产鉴权。
+- 实际响应只暴露展示所需字段。诊断项为 `assessmentId`、最小企业摘要、`status/stage`、创建/更新时间、`reportId/reportStatus`；线索项为 `leadId`、最小企业摘要、联系人、`maskedMobile`、方向、状态与提交时间。
+- 禁止返回 `userId`、`sessionId`、token/hash、幂等/request hash、Consent/Agreement、输入快照、完整手机号或内部错误。
+- `/admin/` 静态资源与两个 Admin API 共用 `adminLocalOnly`；依据 TCP 远端地址接受 IPv4/IPv6 loopback，其他地址返回统一 403 envelope。该限制不信任转发头，也不等同正式身份鉴权。
 
 ## 10. Session/Auth 流程
 
@@ -706,6 +709,8 @@ Phase 3 `ReportGenerator` 由调用方显式传入 `reportId/assessmentId/userId
 
 Repository：Phase 2 的只读 `EnterpriseRepository` / `JsonEnterpriseRepository` 继续读取 fixture。Phase 4 已实现 `SessionRepository`、`ConsentRepository`、`AssessmentRepository`、`ReportRepository`、`LeadRepository` 及对应 JSON 适配器。每个接口提供按 ID、所属用户、幂等键和必要列表查询；领域服务不直接读写文件。
 
+Phase 7 仅给 `AssessmentRepository` 与 `LeadRepository` 增加向后兼容的 `listAll()` 只读契约；`AdminService` 还通过已有 `ReportRepository.findByAssessmentId()` 核对实际持久化报告，再映射、排序和过滤展示字段。没有新增写方法，也没有绕过原有用户侧 Service 权限边界。
+
 - fixture 与 runtime 分离；runtime 在 Git 忽略列表。
 - 写入使用临时文件 + 原子替换；写前校验 schema，损坏时返回可诊断错误且不覆盖原文件。
 - 仅承诺单进程低并发 Demo；生产替换为事务数据库。
@@ -755,7 +760,7 @@ Repository：Phase 2 的只读 `EnterpriseRepository` / `JsonEnterpriseRepositor
 
 - Phase 2 只实现工程骨架、Provider、Mock、企业 API 和健康检查。
 - Phase 3 实现 Engine/字段/report 领域；所有 Evaluator 使用显式 clock/context，并对政策边界单测。
-- Phase 4 已实现 Auth、Session、协议门、状态机、报告和 Lead API。虽然早期 PLAN 将 Admin 查询 API 与 Phase 4 同列，本次明确指令禁止开发 Admin，因此 Admin 仍按 Phase 7 执行。
+- Phase 4 已实现 Auth、Session、协议门、状态机、报告和 Lead API；当时的明确指令将早期 PLAN 同列的 Admin 查询 API 延后。该缺口现已由 Phase 7 的只读 Admin 实现补齐。
 - API 变更必须先更新本契约；字段或规则变更同步 PRD 和测试。
 - 未获得官方平台/审计/专家证据的定性项不得因实现便利从 `manual_review` 改为 `met`。
 

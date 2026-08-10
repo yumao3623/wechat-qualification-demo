@@ -29,6 +29,7 @@ class JsonAssessmentRepository extends AssessmentRepository {
   findByIdempotency(userId, keyHash) {
     return this.collection.find((item) => item.userId === userId && item.idempotencyKeyHash === keyHash);
   }
+  listAll() { return this.collection.list(); }
   listByUser(userId) { return this.collection.filter((item) => item.userId === userId); }
   update(id, updater) { return this.collection.update(id, updater); }
 }
@@ -66,6 +67,7 @@ class JsonLeadRepository extends LeadRepository {
   findByIdempotency(keyHash) {
     return this.collection.find((item) => item.idempotencyKeyHash === keyHash);
   }
+  listAll() { return this.collection.list(); }
 }
 
 function createRuntimeRepositories({ runtimePath }) {

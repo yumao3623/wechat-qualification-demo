@@ -1,19 +1,23 @@
 const express = require('express');
+const path = require('node:path');
 const { config } = require('./config');
 const { DemoAuthProvider } = require('./auth/DemoAuthProvider');
 const { MockEnterpriseProvider } = require('./domain/enterprise/MockEnterpriseProvider');
 const { QualificationEngine } = require('./domain/qualification/QualificationEngine');
 const { ReportGenerator } = require('./domain/report/ReportGenerator');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { adminLocalOnly } = require('./middleware/adminLocalOnly');
 const { requestId } = require('./middleware/requestId');
 const { JsonEnterpriseRepository } = require('./repositories/JsonEnterpriseRepository');
 const { createRuntimeRepositories } = require('./repositories/JsonRuntimeRepositories');
 const { createAssessmentRouter } = require('./routes/assessments');
+const { createAdminRouter } = require('./routes/admin');
 const { createAuthRouter } = require('./routes/auth');
 const { createEnterpriseRouter } = require('./routes/enterprises');
 const { createLeadRouter } = require('./routes/leads');
 const { createReportRouter } = require('./routes/reports');
 const { AssessmentService } = require('./services/AssessmentService');
+const { AdminService } = require('./services/AdminService');
 const { ConsentService } = require('./services/ConsentService');
 const { DynamicFieldService } = require('./services/DynamicFieldService');
 const { EnterpriseService } = require('./services/EnterpriseService');
@@ -53,6 +57,7 @@ function createApp({
   sessionTtlMs = config.sessionTtlMs,
   assessmentPendingMs = config.assessmentPendingMs,
   assessmentStageMs = config.assessmentStageMs,
+  adminRequestPolicy,
   qualificationEngine = new QualificationEngine(),
   reportGenerator = new ReportGenerator()
 } = {}) {
@@ -100,10 +105,15 @@ function createApp({
     clock,
     objectHash
   });
+  const adminService = new AdminService({
+    assessmentRepository: runtimeRepositories.assessmentRepository,
+    reportRepository: runtimeRepositories.reportRepository,
+    leadRepository: runtimeRepositories.leadRepository
+  });
 
   app.locals.services = {
     assessmentService, consentService, dynamicFieldService, enterpriseService,
-    leadService, reportService, sessionService
+    adminService, leadService, reportService, sessionService
   };
   app.locals.repositories = runtimeRepositories;
 
@@ -132,6 +142,13 @@ function createApp({
   }));
   app.use('/api/reports', createReportRouter({ sessionService, reportService }));
   app.use('/api/leads', createLeadRouter({ leadService }));
+  const requireLocalAdmin = adminLocalOnly({ isLocalRequest: adminRequestPolicy });
+  app.use('/api/admin', requireLocalAdmin, createAdminRouter({ adminService }));
+  app.use(
+    '/admin',
+    requireLocalAdmin,
+    express.static(path.resolve(__dirname, '../public/admin'), { index: 'index.html' })
+  );
   app.use(notFoundHandler);
   app.use(errorHandler);
 

@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜测试用例与需求追踪
 
-> 文档版本：Phase 6 / v1.6
+> 文档版本：Phase 7 / v1.7
 > 规格日期：2026-08-10  
-> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 6 共 85 tests / 85 PASS，并以真实监听端口跑通 Auth → Consent/Diagnosis → Status → Report → Reports List → Lead → Logout；用户在微信开发者工具完成 30 项核心人工验收，30/30 PASS。真机、专项异常/多尺寸和 Admin 仍保持 `NOT EXECUTED`。
+> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 7 共 90 tests / 90 PASS，包含 Phase 2–6 的 85 项全量回归；真实 Backend 与本地浏览器已验证 Admin 的正常、Empty、Loading、Error。真机和专项异常/多尺寸仍保持 `NOT EXECUTED`，Phase 8 未开始。
 
 ## 1. 状态与执行规则
 
@@ -151,9 +151,10 @@
 | LEAD-003 | Lead 输入校验 | Integration | 无 Session | 非法手机号、姓名过长、空方向、备注>500 | 各自 400；不保存部分记录 | PASS |
 | LEAD-004 | Lead 幂等 | Integration | 合法请求 | 同一幂等键重复提交 | 返回同一 Lead，不重复保存 | PASS |
 | LEAD-005 | 可选手机号授权 | DevTools/真机 | 若实现可选授权 | 拒绝授权后手填并提交 | 拒绝不阻塞；手填路径完整可用 | NOT EXECUTED |
-| ADMIN-001 | Admin 诊断列表 | Browser E2E | 本地有诊断 | 打开 Admin | 显示企业、ID、状态、创建时间、报告状态及 Demo 标记 | NOT EXECUTED |
-| ADMIN-002 | Admin Lead 列表 | Browser E2E | 本地有 Lead | 打开 Admin | 显示要求字段，手机号默认脱敏；只读 | NOT EXECUTED |
-| ADMIN-003 | Admin 本地限制 | Integration | 非本地来源/未启用 | 请求 Admin API | 403；页面明确非生产权限方案 | NOT EXECUTED |
+| ADMIN-001 | Admin 诊断列表 | Integration + Browser E2E | 本地有诊断 | 打开 Admin | 显示企业、ID、状态、创建时间、报告状态及 Demo 标记 | PASS |
+| ADMIN-002 | Admin Lead 列表 | Integration + Browser E2E | 本地有 Lead | 打开 Admin | 显示要求字段，手机号默认脱敏；只读 | PASS |
+| ADMIN-003 | Admin 本地限制 | Integration | 非本地来源 | 请求 Admin API/静态页 | 403；页面明确非生产权限方案 | PASS |
+| ADMIN-004 | Admin 四态与安全过滤 | Integration + Browser E2E | 空/正常/断开 Backend/读取异常 | 加载、刷新并检查响应 | Loading / Empty / Error / Success 可见；无 Session/Hash/完整手机号/堆栈 | PASS |
 | API-001 | 统一成功/错误格式 | Integration | API 可用 | 覆盖 2xx/400/401/404/409/422/500/503 | 响应符合 envelope；含 requestId；无堆栈 | PASS |
 | API-002 | 404 | Integration | 任意未知路由 | 请求不存在 endpoint | 返回 JSON 404，不返回 HTML 堆栈 | PASS |
 | API-003 | 输入边界 | Integration | API 可用 | 提交超长、错误类型、未知枚举、逻辑矛盾 | 返回稳定校验错误；无异常崩溃 | PASS |
@@ -414,3 +415,36 @@ logout 后旧 token 查询报告 HTTP 401
 用户于 2026-08-10 在微信开发者工具实际执行核心人工清单，提交 30 项逐项结果且全部为 `PASS`。覆盖后台健康、项目编译、冷启动及三 Tab 无自动登录、报告协议首次/重开默认未勾选、未同意/拒绝保持游客、明确同意后登录、有效 Session 复用、企业游客链路、诊断协议、创建与进度、四类报告、Evidence、Gap/Action、报告 Tab ready 记录、顾问无强制手机号授权与 Lead 提交、法律入口、退出及 Console 无红色异常。
 
 仍保持 `NOT EXECUTED`：真机；登录/诊断/报告网络故障注入；报告 Tab pending/processing/failed 专项构造；前后台生命周期与轮询恢复；窄屏、多尺寸和键盘遮挡；草稿真实等待 2 小时过期；Admin。用户本次未注明测试 AppID 类型，该信息不影响已观察行为的记录，但发布前仍须以正式测试 AppID 和 HTTPS 合法域名复验。
+
+## 18. Phase 7 执行记录
+
+自动测试命令：
+
+```text
+pnpm test
+```
+
+Codex Shell 初次原样执行时延续既有宿主问题：PATH 中没有 `node`，因此命令未进入测试。仅对验证进程临时加入 Codex bundled Node 目录后，重新原样执行项目脚本。结果：90 tests，90 PASS，0 FAIL，0 skipped；Phase 2–6 的 85 项全部回归通过。
+
+| Test ID | Module | Type | 实际结果 | Status |
+| --- | --- | --- | --- | --- |
+| P7-ADMIN-001 | 静态 Admin 入口 | Integration + Browser | `/admin/` 由同一 Express 服务返回；页面固定展示本地 Demo/非生产权限提示 | PASS |
+| P7-ADMIN-002 | 诊断只读列表 | Integration + Browser | 默认 runtime 的已完成诊断显示企业、Demo 标记、诊断 ID/状态、报告状态和创建时间 | PASS |
+| P7-ADMIN-003 | Lead 只读列表 | Integration + Browser | 默认 runtime 的 Lead 显示企业、联系人、方向、提交时间；手机号显示为掩码 | PASS |
+| P7-ADMIN-004 | Repository 真实来源 | Integration | 通过现有 Auth/Assessment/Lead API 创建数据后，Admin 列表读取同一 JSON Repository，pending 与 ready/report 关联均正确 | PASS |
+| P7-ADMIN-005 | 本地访问限制 | Integration | 注入非本地策略后两个 API 和静态页均返回 403 统一错误，无 stack | PASS |
+| P7-ADMIN-006 | 字段过滤 | Integration | 响应不含完整手机号、user/session、token/hash、幂等/request hash、Consent/Agreement 或输入快照 | PASS |
+| P7-ADMIN-007 | 四态 | Browser + Static/Integration | 正常 runtime 为 Success；独立空 runtime 为 Empty；刷新中观察 Loading；停止 Backend 后刷新为稳定中文 Error | PASS |
+| P7-REG-001 | Phase 2–6 全量回归 | Automated | 既有 85 项全部 PASS；Rule Engine、Session、Consent、Diagnosis、Report、Lead 和小程序静态契约未回归 | PASS |
+| P7-MINI-001 | 小程序改动边界 | Git Diff | `git diff -- miniprogram` 无输出 | PASS |
+
+真实浏览器验证摘要：
+
+```text
+Success：诊断记录=1，顾问线索=1；诊断 ready/report ready；Lead 手机号为掩码
+Empty：独立空 runtime 下两区计数均为 0，并显示引导文案
+Loading：断开 Backend 后点击刷新，两个区显示“正在加载数据…”且按钮禁用
+Error：请求失败后两个区显示稳定中文 Backend 重试提示
+```
+
+Phase 7 没有执行并保持 `NOT EXECUTED`：真机、Phase 6 已列出的专项故障/多尺寸/生命周期补充项，以及 Phase 8 最终集成硬化。Phase 7 完成后立即停止，不把这些未执行项写成通过。

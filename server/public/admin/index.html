@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>轻量 Admin｜企业资质预评估 Demo</title>
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">INTERNAL DEMO</p>
+        <h1>轻量 Admin</h1>
+        <p class="subtitle">查看当前 Backend 已持久化的诊断记录与顾问线索。</p>
+      </div>
+      <button id="refreshButton" class="button" type="button">刷新数据</button>
+    </header>
+
+    <aside class="local-warning" role="note">
+      <strong>本地 Demo 管理页，不具备生产权限安全。</strong>
+      仅允许从运行 Backend 的本机访问；页面只读，不提供编辑、删除、导出或派单。
+    </aside>
+
+    <section class="metrics" aria-label="数据概览">
+      <article class="metric-card">
+        <span>诊断记录</span>
+        <strong id="assessmentCount">—</strong>
+      </article>
+      <article class="metric-card">
+        <span>顾问线索</span>
+        <strong id="leadCount">—</strong>
+      </article>
+      <article class="metric-card">
+        <span>数据模式</span>
+        <strong class="metric-label">虚构 Demo</strong>
+      </article>
+    </section>
+
+    <section id="assessmentSection" class="data-panel" data-state="loading">
+      <div class="panel-heading">
+        <div>
+          <p class="section-kicker">ASSESSMENTS</p>
+          <h2>诊断记录</h2>
+        </div>
+      </div>
+      <div class="state-box" data-role="state" aria-live="polite">正在加载诊断记录…</div>
+      <div class="table-scroll" data-role="content" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th>企业</th>
+              <th>诊断 ID</th>
+              <th>诊断状态</th>
+              <th>报告状态</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody id="assessmentRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="leadSection" class="data-panel" data-state="loading">
+      <div class="panel-heading">
+        <div>
+          <p class="section-kicker">CONSULTANT LEADS</p>
+          <h2>顾问线索</h2>
+        </div>
+      </div>
+      <div class="state-box" data-role="state" aria-live="polite">正在加载顾问线索…</div>
+      <div class="table-scroll" data-role="content" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th>企业</th>
+              <th>联系人</th>
+              <th>手机号</th>
+              <th>咨询方向</th>
+              <th>提交时间</th>
+            </tr>
+          </thead>
+          <tbody id="leadRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="/admin/admin.js" defer></script>
+</body>
+</html>

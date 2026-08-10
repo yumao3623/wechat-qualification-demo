@@ -259,3 +259,12 @@
 - 发现：Phase 6 初版的未登录报告按钮直接调用 Session 创建函数，虽然不是自动登录，但绕过了原始需求中“查看报告也须经协议同意”的前端时序门。
 - 修正：复用 `AgreementDialog` 的法律链接、默认未勾选、拒绝/关闭能力；报告场景使用独立标题和 CTA。按钮只打开弹窗，`confirm` 才创建/复用 Session 并加载列表。
 - 边界：已有有效 Session 不重复要求同意；报告查看不新增后端 Consent API，也不改诊断创建的 Consent Gate、权限隔离或 Rule Engine。
+
+## D-034 Phase 7 本地只读 Admin 接入
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：按 D-004 在同一 Express 进程提供 `/admin/` 原生静态页与 `/api/admin/assessments`、`/api/admin/leads`；只读读取现有 Assessment/Lead JSON Repository。
+- Repository：仅向 `AssessmentRepository` 和 `LeadRepository` 增加 `listAll()` 查询，并复用已有 `ReportRepository.findByAssessmentId()` 核对持久化报告。Admin 不读取 Session/Consent，不调用 Rule Engine，不修改 Diagnosis/Report/Lead，也不提供编辑、删除、导出或派单。
+- 本地限制：静态页和 API 共用 loopback 地址门禁；远程请求返回 403。此设计只是降低本地 Demo 暴露面，不宣称具备生产身份、RBAC 或审计。
+- 最小字段：诊断只返回企业摘要、诊断/报告状态和时间；Lead 手机号在 Backend 脱敏，只返回展示需要的企业、联系人、方向、状态和时间。Session、token/hash、幂等 hash、Consent、输入快照和完整手机号均不出现在 Admin 响应。
+- 验证：Phase 7 自动测试覆盖空数据、真实持久化数据、非本地 403、安全错误、四态实现及脱敏；真实浏览器验证正常、Empty、Loading 与 Backend 断开 Error。小程序目录零修改。

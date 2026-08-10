@@ -24,6 +24,7 @@ async function createTestContext(t, options = {}) {
     sessionTtlMs: options.sessionTtlMs || 60_000,
     assessmentPendingMs: options.assessmentPendingMs || 100,
     assessmentStageMs: options.assessmentStageMs || 100,
+    adminRequestPolicy: options.adminRequestPolicy,
     qualificationEngine: options.qualificationEngine,
     reportGenerator: options.reportGenerator
   });
