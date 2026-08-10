@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜测试用例与需求追踪
 
-> 文档版本：Phase 3 / v1.2
+> 文档版本：Phase 4 / v1.3
 > 规格日期：2026-08-10  
-> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider。Phase 3 只更新实际执行覆盖到的领域用例；Session、诊断/Report API、小程序、Admin 与 E2E 继续保持 `NOT EXECUTED`。
+> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 4 共 68 tests / 68 PASS，并完成真实 HTTP 后端链路；小程序、DevTools、真机和 Admin 继续保持 `NOT EXECUTED`。
 
 ## 1. 状态与执行规则
 
@@ -50,7 +50,7 @@
 | FORM-002 | 字段合并 | Unit | 多类规则需要同一年度研发费用 | 生成 schema | 只出现一个字段，合并所有 rule ID | PASS |
 | FORM-003 | `0`/`false` 边界 | Unit | 字段值分别为 0、false | 计算缺失 | 两者不被当作缺失；仍可被规则判定未满足 | PASS |
 | FORM-004 | 无效期间 | Unit | 有 2024 值但规则需要 2025 | 计算缺失 | 标记 `invalid_period` 并要求 2025 值，不误用旧数据 | PASS |
-| FORM-005 | 单位错误 | Unit/API | 金额字段单位缺失或错误 | 请求 missing-fields/提交补数 | 返回 422 或字段错误，不进入评估 | NOT EXECUTED |
+| FORM-005 | 单位错误 | Unit/API | 金额字段单位缺失或错误 | 请求 missing-fields/提交补数 | 返回 422 或字段错误，不进入评估 | PASS |
 | FORM-006 | 地域裁剪 | Unit | 企业注册地非杭州 | 生成 schema | 不为杭州新雏鹰单独询问字段；该资质预期不适用 | PASS |
 | FORM-007 | 动态页面渲染 | DevTools E2E | B 场景 | 进入补充页 | 只渲染服务端 schema；标签、单位、期间、用途、帮助可见 | NOT EXECUTED |
 | FORM-008 | 补数影响结果 | Integration/E2E | B 场景初始缺研发数据 | 记录初始 missing；补齐有效值；重新评估 | 缺失 schema 减少，报告 criterion/总体状态按规则真实变化 | PASS |
@@ -65,29 +65,29 @@
 | CONSENT-002 | 未同意确认 | DevTools E2E | 弹窗打开且未勾选 | 点击“同意并发起诊断” | 留在弹窗并提示；无 `wx.login`；无诊断 | NOT EXECUTED |
 | CONSENT-003 | 关闭/拒绝 | DevTools E2E | 弹窗打开 | 点击关闭或暂不发起 | 返回原页；仍可游客浏览；无登录/诊断 | NOT EXECUTED |
 | CONSENT-004 | 明确同意时序 | DevTools E2E | 弹窗未勾选 | 勾选并确认，观察调用 | 先同意，再调用 `wx.login`，Session 成功后才创建诊断 | NOT EXECUTED |
-| CONSENT-005 | 服务端协议门 | Integration | 有 Session | 缺一版本、未同意、时间无效、来源错误分别创建 | 均返回 409/400；不保存 assessment | NOT EXECUTED |
+| CONSENT-005 | 服务端协议门 | Integration | 有 Session | 缺一版本、未同意、时间无效、来源错误分别创建 | 均返回 409/400；不保存 assessment | PASS |
 | AUTH-001 | 首次无自动登录 | DevTools E2E | 清空状态 | 冷启动、切 Tab、浏览游客页面 | 全程不调用 `wx.login`，直到用户明确触发 | NOT EXECUTED |
-| AUTH-002 | Demo 登录成功 | Integration | 合法非空 code | POST `/auth/login` | 返回随机 token 一次、`authMode=demo`、有效期；Repository 仅存摘要 | NOT EXECUTED |
-| AUTH-003 | 登录输入校验 | Integration | 无 Session | 提交空、超长或类型错误 code | 返回 400；不创建 Session；日志无 code | NOT EXECUTED |
+| AUTH-002 | Demo 登录成功 | Integration | 合法非空 code | POST `/auth/login` | 返回随机 token 一次、`authMode=demo`、有效期；Repository 仅存摘要 | PASS |
+| AUTH-003 | 登录输入校验 | Integration | 无 Session | 提交空、超长或类型错误 code | 返回 400；不创建 Session；日志无 code | PASS |
 | AUTH-004 | 登录失败恢复 | DevTools E2E | 注入 `wx.login` 或后端失败 | 明确同意并发起 | 显示尚未创建诊断；可重试/关闭；游客功能仍可用 | NOT EXECUTED |
-| AUTH-005 | 查询 Session | Integration | 有效 token | GET `/auth/session` | 返回当前 Session，不含 token/hash | NOT EXECUTED |
-| AUTH-006 | 缺失/无效/过期 token | Integration | 三种 token 状态 | 请求受保护 API | 分别返回稳定 401 错误；不泄露资源 | NOT EXECUTED |
-| AUTH-007 | 退出登录 | Integration/DevTools | 已登录且有本地 token | DELETE Session 并回到 Tab | 服务端吊销、本地清除 token/敏感草稿；报告 Tab 回未登录态 | NOT EXECUTED |
+| AUTH-005 | 查询 Session | Integration | 有效 token | GET `/auth/session` | 返回当前 Session，不含 token/hash | PASS |
+| AUTH-006 | 缺失/无效/过期 token | Integration | 三种 token 状态 | 请求受保护 API | 分别返回稳定 401 错误；不泄露资源 | PASS |
+| AUTH-007 | 退出登录（后端） | Integration | 已登录且有 token | DELETE Session 后用旧 token 请求个人报告 | 服务端吊销；旧 token 失效且已生成报告不删除 | PASS |
 | AUTH-008 | 报告 Tab 主动登录 | DevTools E2E | 游客进入报告 Tab | 不点击按钮后观察；再点击“登录查看报告” | 初始无授权；点击后才调用 `wx.login` | NOT EXECUTED |
 
 ## 6. 诊断状态机与 API
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| ASM-001 | 创建诊断 | Integration | 有效 Session、完整协议、合法输入 | POST `/assessments` | 201，持久化 `pending`、输入/协议/规则快照 | NOT EXECUTED |
-| ASM-002 | 未登录创建 | Integration | 无 Session | POST `/assessments` | 401；无持久化记录 | NOT EXECUTED |
-| ASM-003 | 创建幂等 | Integration | 有效请求 | 使用同一幂等键重复提交 | 返回同一 assessment，不重复创建/报告 | NOT EXECUTED |
-| ASM-004 | 幂等键冲突 | Integration | 同一幂等键 | 第二次修改 payload 提交 | 409 `STATE_CONFLICT`；原记录不变 | NOT EXECUTED |
-| ASM-005 | 正常状态流转 | Unit/Integration fake clock | pending assessment | 推进 clock 并轮询 | 严格 `pending→processing→ready`，阶段单向且报告只生成一次 | NOT EXECUTED |
-| ASM-006 | 失败状态流转 | Unit/Integration | 注入领域错误 | 推进状态 | `pending/processing→failed`；错误码友好；不得转 ready | NOT EXECUTED |
-| ASM-007 | 重启恢复 | Integration | processing 已持久化 | 重建 app/repository 后查询 | 依创建时间/clock 继续推进，不永久卡住 | NOT EXECUTED |
-| ASM-008 | 状态权限隔离 | Integration | 用户 A/B，各有 Session | B 查询 A 的 assessment | 404（防枚举）且无数据泄露 | NOT EXECUTED |
-| ASM-009 | 报告未就绪 | Integration | assessment pending/processing | GET assessment report | 409 `REPORT_NOT_READY` 并返回状态链接 | NOT EXECUTED |
+| ASM-001 | 创建诊断 | Integration | 有效 Session、完整协议、合法输入 | POST `/assessments` | 201，持久化 `pending`、输入/协议/规则快照 | PASS |
+| ASM-002 | 未登录创建 | Integration | 无 Session | POST `/assessments` | 401；无持久化记录 | PASS |
+| ASM-003 | 创建幂等 | Integration | 有效请求 | 使用同一幂等键重复提交 | 返回同一 assessment，不重复创建/报告 | PASS |
+| ASM-004 | 幂等键冲突 | Integration | 同一幂等键 | 第二次修改 payload 提交 | 409 `STATE_CONFLICT`；原记录不变 | PASS |
+| ASM-005 | 正常状态流转 | Unit/Integration fake clock | pending assessment | 推进 clock 并轮询 | 严格 `pending→processing→ready`，阶段单向且报告只生成一次 | PASS |
+| ASM-006 | 失败状态流转 | Unit/Integration | 注入领域错误 | 推进状态 | `pending/processing→failed`；错误码友好；不得转 ready | PASS |
+| ASM-007 | 重启恢复 | Integration | processing 已持久化 | 重建 app/repository 后查询 | 依创建时间/clock 继续推进，不永久卡住 | PASS |
+| ASM-008 | 状态权限隔离 | Integration | 用户 A/B，各有 Session | B 查询 A 的 assessment | 404（防枚举）且无数据泄露 | PASS |
+| ASM-009 | 报告未就绪 | Integration | assessment pending/processing | GET assessment report | 409 `REPORT_NOT_READY` 并返回状态链接 | PASS |
 | ASM-010 | 进度前后台恢复 | DevTools E2E | processing | 切后台再回前台 | 后台停止轮询；回前台立即读服务端并恢复阶段 | NOT EXECUTED |
 | ASM-011 | 诊断失败 UI | DevTools E2E | failed assessment | 打开进度/报告 Tab | 显示失败态、可理解原因和重新发起，不显示空报告 | NOT EXECUTED |
 
@@ -127,8 +127,8 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | RPT-001 | 报告生成 | Unit/Integration | 四类结果存在 | 生成 Report | 恰好四类；保存输入 hash、规则版本、生成时间和免责声明 | PASS |
 | RPT-002 | 报告不可变 | Integration | 已生成报告后更新规则 | 再查旧报告 | 旧报告规则/结果不变；新诊断使用新版本 | NOT EXECUTED |
-| RPT-003 | 报告权限 | Integration | 用户 A/B | B 查询 A 的报告 | 404 且无摘要泄露 | NOT EXECUTED |
-| RPT-004 | 报告列表 | Integration | 当前用户有 ready/processing/failed | GET `/reports` | 只返回本人摘要、分页和正确状态 | NOT EXECUTED |
+| RPT-003 | 报告权限 | Integration | 用户 A/B | B 查询 A 的报告 | 404 且无摘要泄露 | PASS |
+| RPT-004 | 报告列表 | Integration | 当前用户有 ready/processing/failed | GET `/reports` | 只返回本人摘要、分页和正确状态 | PASS |
 | RPT-005 | 报告详情 UI | DevTools E2E | ready 报告 | 打开报告 | 四类卡、规则日期/地域、manual_review 数量、免责声明和入口可见 | NOT EXECUTED |
 | EVD-001 | Evidence 完整性 | Unit | 各类 criterion | 生成 evidence | 每项有 ruleId、criterion、requirement、actualValue/source/result/missing/explanation/action/policyRef | PASS |
 | EVD-002 | 缺失与零值展示 | Unit/UI | 一项 null、一项 0 | 展示证据 | null 显示未提供且 missing 非空；0 显示为 0 | NOT EXECUTED |
@@ -146,21 +146,21 @@
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| LEAD-001 | 游客提交顾问 | Integration/E2E | 无 Session，合法表单且独立同意 | POST Lead | 201 并真实保存；UI 显示“咨询需求已提交” | NOT EXECUTED |
+| LEAD-001 | 游客提交顾问 | Integration | 无 Session，合法表单且独立同意 | POST Lead | 201 并真实保存；前端成功文案待 Phase 6 | PASS |
 | LEAD-002 | Lead 同意默认值 | DevTools E2E | 首次/重开表单 | 打开、勾选、退出、重开 | 独立同意每次默认 false；不复用诊断协议 | NOT EXECUTED |
-| LEAD-003 | Lead 输入校验 | Integration | 无 Session | 非法手机号、姓名过长、空方向、备注>500 | 各自 400；不保存部分记录 | NOT EXECUTED |
-| LEAD-004 | Lead 幂等 | Integration | 合法请求 | 同一幂等键重复提交 | 返回同一 Lead，不重复保存 | NOT EXECUTED |
+| LEAD-003 | Lead 输入校验 | Integration | 无 Session | 非法手机号、姓名过长、空方向、备注>500 | 各自 400；不保存部分记录 | PASS |
+| LEAD-004 | Lead 幂等 | Integration | 合法请求 | 同一幂等键重复提交 | 返回同一 Lead，不重复保存 | PASS |
 | LEAD-005 | 可选手机号授权 | DevTools/真机 | 若实现可选授权 | 拒绝授权后手填并提交 | 拒绝不阻塞；手填路径完整可用 | NOT EXECUTED |
 | ADMIN-001 | Admin 诊断列表 | Browser E2E | 本地有诊断 | 打开 Admin | 显示企业、ID、状态、创建时间、报告状态及 Demo 标记 | NOT EXECUTED |
 | ADMIN-002 | Admin Lead 列表 | Browser E2E | 本地有 Lead | 打开 Admin | 显示要求字段，手机号默认脱敏；只读 | NOT EXECUTED |
 | ADMIN-003 | Admin 本地限制 | Integration | 非本地来源/未启用 | 请求 Admin API | 403；页面明确非生产权限方案 | NOT EXECUTED |
-| API-001 | 统一成功/错误格式 | Integration | API 可用 | 覆盖 2xx/400/401/404/409/422/500/503 | 响应符合 envelope；含 requestId；无堆栈 | NOT EXECUTED |
+| API-001 | 统一成功/错误格式 | Integration | API 可用 | 覆盖 2xx/400/401/404/409/422/500/503 | 响应符合 envelope；含 requestId；无堆栈 | PASS |
 | API-002 | 404 | Integration | 任意未知路由 | 请求不存在 endpoint | 返回 JSON 404，不返回 HTML 堆栈 | PASS |
-| API-003 | 输入边界 | Integration | API 可用 | 提交超长、错误类型、未知枚举、逻辑矛盾 | 返回稳定校验错误；无异常崩溃 | NOT EXECUTED |
+| API-003 | 输入边界 | Integration | API 可用 | 提交超长、错误类型、未知枚举、逻辑矛盾 | 返回稳定校验错误；无异常崩溃 | PASS |
 | SEC-001 | 敏感信息扫描 | Static | 工程和配置存在 | 扫描 Key/Secret/token/密码模式 | 无真实 AppSecret、企查查 Secret、token、生产密码 | PASS |
 | SEC-002 | 日志脱敏 | Integration | 触发登录、Lead、诊断错误 | 检查日志 | 不记录 code、Bearer token、完整手机号或经营敏感 payload | NOT EXECUTED |
-| SEC-003 | Runtime Git 隔离 | Static | 运行生成数据 | 检查 Git 状态 | `.env`、runtime JSON、token/Lead 数据不被跟踪 | NOT EXECUTED |
-| ERR-001 | JSON 损坏 | Integration | runtime 文件损坏 | 启动/读取 | 返回明确内部错误并保留损坏文件，不静默覆盖为空 | NOT EXECUTED |
+| SEC-003 | Runtime Git 隔离 | Static | 运行生成数据 | 检查 Git 状态 | `.env`、runtime JSON、token/Lead 数据不被跟踪 | PASS |
+| ERR-001 | JSON 损坏 | Integration | runtime 文件损坏 | 启动/读取 | 返回明确内部错误并保留损坏文件，不静默覆盖为空 | PASS |
 | ERR-002 | 弱网/超时 | DevTools/真机 | 注入超时或弱网 | 搜索、登录、轮询、Lead | 有超时与重试；不重复创建/提交；状态可恢复 | NOT EXECUTED |
 
 ## 10. 微信开发者工具人工 E2E 主清单
@@ -287,3 +287,46 @@ Phase 3 新增并实际执行的领域覆盖：
 | P3-PURE-001 | 纯度与不变性 | Unit | 冻结 profile/context | 连续评估并对比原对象 | 输出确定；原企业/fixture 对象未被修改 | PASS |
 
 Phase 3 未执行并保持 `NOT EXECUTED`：Session/Auth、协议门、诊断 REST/状态机、Report REST/列表/权限、顾问 API、小程序/DevTools/真机 E2E、Admin。它们属于 Phase 4 及之后。
+
+## 15. Phase 4 执行记录
+
+自动测试命令（Codex 桌面验证进程使用 bundled Node；项目脚本仍为可移植的 `node --test`）：
+
+```text
+node --test
+```
+
+结果：68 tests，68 PASS，0 FAIL，0 skipped；包含 Phase 2/3 的 47 项全量回归。
+
+Phase 4 新增并实际执行的覆盖：
+
+| Test ID | Module | Type | 实际结果 | Status |
+| --- | --- | --- | --- | --- |
+| P4-AUTH-001 | Demo Session | Integration | 创建、查询、随机 token、仅存摘要、code 单次使用、幂等与输入校验通过 | PASS |
+| P4-AUTH-002 | Session 生命周期 | Integration fake clock | 缺失/格式错误/未知/过期 token 均返回稳定 401；注销后 token 失效 | PASS |
+| P4-CONSENT-001 | Consent Gate | Integration | 无 Session、缺协议、旧版本、拒绝状态均不能创建；合法记录保存版本/时间/Session/User/用途 | PASS |
+| P4-ASM-001 | 创建与幂等 | Integration | pending 快照、输入 hash、规则版本保存；重复不新增，payload 冲突 409 | PASS |
+| P4-ASM-002 | 状态机 | Integration fake clock | 实际观察 pending → processing → ready；Report 只保存一次 | PASS |
+| P4-ASM-003 | 失败与恢复 | Integration | Engine 异常、Report 保存异常转 failed；服务重建后可恢复 ready | PASS |
+| P4-RPT-001 | 四场景报告 | Integration | A 为 opportunity；B 可生成 needs_data；C 为 not_met；D 新雏鹰 not_applicable | PASS |
+| P4-RPT-002 | Report API | Integration | 未就绪 409；按诊断/ID获取、本人列表、空列表、processing/ready/failed 表达通过 | PASS |
+| P4-AUTHZ-001 | 权限隔离 | Integration | 用户 B 查询用户 A 的 diagnosis/report 均为 404；列表无摘要泄露 | PASS |
+| P4-INPUT-001 | Supplemental Data | Integration | user 来源、统计期、单位、逻辑校验、企业快照与 fixture 不变性通过 | PASS |
+| P4-LEAD-001 | 顾问线索 | Integration | 游客合法提交、独立同意、输入校验、幂等和企业匹配通过 | PASS |
+| P4-REPO-001 | JSON Repository | Integration | 分集合原子写入；损坏文件安全 500 且不静默覆盖；注销不删除报告 | PASS |
+| P4-SEC-001 | 错误与敏感信息 | Integration/Static | 响应无 stack/路径/token/code；runtime 被 Git 忽略 | PASS |
+
+真实 HTTP 验证（非 test runner 内部调用）：
+
+```text
+health=ok
+authMode=demo
+statusHistory=pending -> processing -> ready
+qualificationCount=4
+reportListCount=1
+logout 后访问个人报告 HTTP 401
+```
+
+实际步骤：启动 Backend → POST Demo Login → 提交三个协议版本及同意时间 → POST Assessment → 轮询 Status → 获取 Report → 查询 Report List → DELETE Session → 使用旧 token 查询 Report。运行数据写入独立临时目录并在验证后清理；输出未打印 Session token。
+
+Phase 4 仍为 `NOT EXECUTED`：所有微信小程序/DevTools/真机 UI 用例、协议 checkbox 默认值的 UI 行为、前端草稿 TTL、Report Tab/My Tab、Admin 与完整小程序 E2E。不得用后端 PASS 替代这些状态。

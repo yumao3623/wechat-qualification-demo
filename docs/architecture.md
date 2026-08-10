@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜技术架构与接口契约
 
-> 文档版本：Phase 3 / v1.1
+> 文档版本：Phase 4 / v1.2
 > 规格日期：2026-08-10  
-> 当前边界：本文件是 Phase 2–4 的实现契约；Phase 3 已实现独立 Rule Engine、动态字段、补数合并和 Report 领域对象，未实现 Phase 4 REST/Session/诊断流。
+> 当前边界：Phase 4 已实现 Demo Auth、Session、协议快照、诊断状态机、Report 持久化/列表/详情和顾问线索 API；按本阶段明确指令未实现小程序页面或 Admin。
 
 ## 1. 架构目标
 
@@ -62,8 +62,10 @@
 │   │   │   ├── qualification/
 │   │   │   ├── dynamic-form/
 │   │   │   └── report/
-│   │   ├── repositories/     # interface + JSON implementation
-│   │   └── auth/             # DemoAuthProvider；生产 Provider 说明/预留
+│   │   ├── repositories/     # fixture/runtime interface + JSON implementation
+│   │   ├── auth/             # DemoAuthProvider；生产 Provider 说明/预留
+│   │   ├── config/           # 集中的法律版本常量
+│   │   └── utils/            # clock、ID、hash 与稳定序列化
 │   ├── data/
 │   │   ├── fixtures/         # Git 跟踪的虚构数据
 │   │   └── runtime/          # Git 忽略的运行数据
@@ -379,6 +381,7 @@ Headers：有效 Bearer Session + `X-Idempotency-Key`。
   "supplements": { "fields": {} },
   "context": { "targetApplicationYear": 2026 },
   "agreement": {
+    "accepted": true,
     "userAgreementVersion": "2026-08-10",
     "privacyPolicyVersion": "2026-08-10",
     "disclaimerVersion": "2026-08-10",
@@ -405,6 +408,21 @@ Headers：有效 Bearer Session + `X-Idempotency-Key`。
 
 后端必须校验 Session、企业、补充字段、协议三版本、时间合理性和来源。缺协议返回 409 `AGREEMENT_REQUIRED`；未登录 401；相同幂等键返回原诊断（200/201 语义保持可预测），不得重复创建。
 
+#### 9.5.1 Phase 6 前端准确调用顺序
+
+Consent **包含在 `POST /api/assessments` 中提交**。当前不存在、也不计划为此流程新增独立 Consent endpoint；后端在创建诊断用例内部校验并保存独立 Consent 记录及 Assessment 协议快照，避免产生“已同意但没有对应诊断”的额外前端状态。
+
+Phase 6 应严格按以下顺序调用：
+
+1. 打开协议弹窗时本地设置 `checked=false`，此时不调用登录或后端 Consent API。
+2. 用户勾选并确认后，前端立即生成 `agreedAt = new Date().toISOString()`，并从前端集中配置读取与后端一致的三个协议版本；未勾选、拒绝或关闭时停止。
+3. 调用 `wx.login` 获取一次性 code。
+4. 调用 `POST /api/auth/login`，发送独立的 `X-Idempotency-Key` 和 `{ code, client }`；成功后保存返回的 Demo Session token。
+5. 调用 `POST /api/assessments`，发送 `Authorization: Bearer <sessionToken>`、新的诊断 `X-Idempotency-Key`，以及本节完整 request body。`agreement.accepted` 由 Phase 6 明确发送为 `true`。
+6. 创建成功后使用返回的 `assessmentId` 轮询 `GET /api/assessments/:id/status`；ready 后读取 `/api/assessments/:id/report`。
+
+登录成功但诊断请求失败时，前端使用相同诊断幂等键和相同 payload 重试，不单独补交 Consent。协议版本变化后必须重新打开弹窗并取得新同意快照。
+
 ### 9.6 状态和报告
 
 `GET /api/assessments/:id/status`
@@ -430,6 +448,8 @@ Headers：有效 Bearer Session + `X-Idempotency-Key`。
 - `GET /api/assessments/:id/report` 在 ready 时 200；未 ready 返回 409 `REPORT_NOT_READY` 并包含当前状态链接。
 
 `GET /api/reports` 返回当前用户的摘要列表；`GET /api/reports/:id` 返回完整 Report。访问他人资源统一 404 或 403 的策略需固定，Demo 采用 404 减少资源枚举。
+
+Phase 4 的报告列表以当前用户的 Assessment 为主记录并关联已生成 Report，因此空列表以及 `pending/processing/ready/failed` 均能被真实表达；`summary` 只在 Report 已持久化后出现。
 
 ### 9.7 顾问线索
 
@@ -498,6 +518,8 @@ guest
 
 Token 明文只在登录响应返回一次，Repository 只保存摘要；日志和错误不得记录 token/code。Demo 默认 TTL 12 小时（配置项）；生产需正式 `code2Session`、稳定用户绑定、token 轮换、TLS、密钥托管和安全审查。
 
+Phase 4 实现补充：登录 code 保存带域分隔的 SHA-256 摘要并执行单次使用；相同幂等键和 payload 在同一进程返回原响应，服务重建后会为同一 Session 轮换新 token 而不新建 Session。不同 payload 复用幂等键返回 `STATE_CONFLICT`。Demo code 仅产生本地演示身份，不能冒充微信 openid。
+
 ## 11. Diagnosis 状态机
 
 ### 11.1 状态与阶段
@@ -528,6 +550,8 @@ pending ──time/service──> processing ──all stages──> ready
 - 状态由创建时间和可注入 clock 推导推进；无需 worker。每次查询/服务启动恢复时可推进。
 - Report 生成必须幂等；同一 assessment 最多一个 report。
 - 服务重启后从 Repository 恢复，不能永久卡在仅内存计时器状态。
+- 默认 `pending` 300ms、每阶段 200ms，可由环境变量调整；这是进度演示时间，不是规则计算耗时承诺。
+- Engine 或 Report 持久化异常会保存稳定的 `ASSESSMENT_PROCESSING_FAILED` / `REPORT_PERSISTENCE_FAILED`，对外不包含异常文本、路径或堆栈。
 
 ### 11.3 Assessment 模型
 
@@ -678,13 +702,20 @@ Phase 3 `ReportGenerator` 由调用方显式传入 `reportId/assessmentId/userId
 
 ## 16. Repository 与持久化
 
-Repository：Phase 2 已实现只读 `EnterpriseRepository` / `JsonEnterpriseRepository`，由 Mock Provider 读取 fixture；后续阶段实现 `SessionRepository`、`AssessmentRepository`、`ReportRepository`、`LeadRepository`。每个接口提供按 ID、所属用户和必要列表查询；领域服务不直接读写文件。
+Repository：Phase 2 的只读 `EnterpriseRepository` / `JsonEnterpriseRepository` 继续读取 fixture。Phase 4 已实现 `SessionRepository`、`ConsentRepository`、`AssessmentRepository`、`ReportRepository`、`LeadRepository` 及对应 JSON 适配器。每个接口提供按 ID、所属用户、幂等键和必要列表查询；领域服务不直接读写文件。
 
 - fixture 与 runtime 分离；runtime 在 Git 忽略列表。
 - 写入使用临时文件 + 原子替换；写前校验 schema，损坏时返回可诊断错误且不覆盖原文件。
 - 仅承诺单进程低并发 Demo；生产替换为事务数据库。
 - 报告与 assessment 的输入/规则快照不可变。
 - 草稿默认只在小程序本地短期保存，不记录到服务端日志。
+- runtime 分为 `sessions.json`、`consents.json`、`assessments.json`、`reports.json`、`leads.json`，各集合独立写入并在单进程内串行化，保存一个 Report 不会覆盖其他集合。
+
+### 16.1 Consent 持久化语义
+
+冻结的创建诊断 request 以三个当前协议版本、有效 ISO 8601 `agreedAt` 和 `agreementSource=assessment-dialog` 作为明确同意证据；若额外提交 `accepted`，只能为 `true`。服务端不从缺失字段推断同意，而是在完整校验后单独保存 `accepted=true`、Session/User、诊断 ID、用途上下文和记录时间，再把同一内容作为 Assessment 快照。版本常量集中在 `config/legalVersions.js`。
+
+不设置“最近 24 小时”下限；该限制不是法律或微信平台要求，也不在冻结 PRD 中。服务端只拒绝不可解析的时间或明显晚于服务器当前时间的时间戳，并允许 5 分钟客户端时钟偏差。协议更新后的重新同意通过三个版本字段是否匹配当前常量判断。
 
 ## 17. Mock 与生产模式差异
 
@@ -705,7 +736,7 @@ Repository：Phase 2 已实现只读 `EnterpriseRepository` / `JsonEnterpriseRep
 - 错误响应不包含堆栈、路径、环境变量或原始上游响应。
 - 日志脱敏登录 code、Bearer token、手机号、经营敏感字段；request ID 用于排查。
 - 受保护资源按 `userId` 隔离；不能仅靠客户端传 user ID。
-- 基础限流适用于登录、搜索、创建诊断和 Lead；幂等不替代限流。
+- 登录、诊断和 Lead 已实现输入边界与幂等；生产级基础限流仍是 Phase 8/上线待办，幂等不能替代限流。
 - 本地 Admin 默认不对外网开放；明确不是生产鉴权。
 
 ## 19. 真实企查查接入步骤（未来）
@@ -722,6 +753,6 @@ Repository：Phase 2 已实现只读 `EnterpriseRepository` / `JsonEnterpriseRep
 
 - Phase 2 只实现工程骨架、Provider、Mock、企业 API 和健康检查。
 - Phase 3 实现 Engine/字段/report 领域；所有 Evaluator 使用显式 clock/context，并对政策边界单测。
-- Phase 4 实现 Auth、Session、协议门、状态机、报告和 Lead API。
+- Phase 4 已实现 Auth、Session、协议门、状态机、报告和 Lead API。虽然早期 PLAN 将 Admin 查询 API 与 Phase 4 同列，本次明确指令禁止开发 Admin，因此 Admin 仍按 Phase 7 执行。
 - API 变更必须先更新本契约；字段或规则变更同步 PRD 和测试。
 - 未获得官方平台/审计/专家证据的定性项不得因实现便利从 `manual_review` 改为 `met`。

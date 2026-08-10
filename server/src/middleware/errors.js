@@ -18,4 +18,13 @@ function validationError(field, reason) {
   });
 }
 
-module.exports = { AppError, validationError };
+function validationErrors(fields) {
+  return new AppError({
+    status: 400,
+    code: 'VALIDATION_ERROR',
+    message: '提交内容有误，请检查后重试。',
+    fields
+  });
+}
+
+module.exports = { AppError, validationError, validationErrors };

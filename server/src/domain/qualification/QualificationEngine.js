@@ -38,6 +38,11 @@ class QualificationEngine {
 
   evaluate(profile, context) {
     const assessmentInput = this.buildAssessmentInput(profile, context);
+    return this.evaluateAssessmentInput(assessmentInput, context);
+  }
+
+  evaluateAssessmentInput(assessmentInput, context) {
+    assertContext(context);
     return this.evaluators.map((evaluator) => evaluator.evaluate(assessmentInput, context));
   }
 

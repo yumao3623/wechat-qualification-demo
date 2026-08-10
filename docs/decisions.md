@@ -178,3 +178,35 @@
 - 决策：用户补充使用第 5 节冻结的 `sourceType=user`，并额外保存 `sourceLabel=user_supplied` / `origin=user_supplied`以明确区分来源。与已有非空 Provider/Mock 值冲突时不覆盖，记入 `fieldConflicts[]` 并交人工核验。
 - fixture 更新：A/D 完整场景补齐三年 `domesticRdExpense`、`totalRevenue`、`highTechRevenue`（D）及 `rdScoringMethod`，用于避免把“完整场景”误做成缺数据场景。
 - 数据边界：新增值仍是虚构 `demo_mock`，没有改成 `official_platform/official_registry`，不表示真实官方证据。B 继续使用 `null`/字段不存在，C 继续使用 `0/false/空数组`。
+
+## D-024 Phase 4 范围冲突处理
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：实现 PLAN Phase 4 明确包含的 Demo Auth、Session、Consent、诊断状态机、Report 持久化/列表/详情和游客顾问 Lead；不实现 Admin API/UI。
+- 原因：本次 Phase 4 指令明确写明“不要开发 Admin”，优先级高于早期 PLAN 将 Admin 查询 API 同列在 Phase 4 的安排；PLAN 本身另有 Phase 7 轻量 Admin 阶段。顾问 Lead 则被 PLAN 明确列入 Phase 4 且本次指令允许在此前提下实现。
+- 影响：Phase 4 后端主链路完整，Admin 用例继续保持 `NOT EXECUTED`，不得宣称 Admin 已完成。
+
+## D-025 Session、Consent 与本地身份边界
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：`DemoAuthProvider` 只验证 1–256 字符 code 并生成明确标记的本地 Demo 身份；Session token 使用 32 字节随机值，Repository 只存带域分隔的 SHA-256 摘要，默认 TTL 12 小时，注销只吊销 Session 不删除报告。
+- code 与幂等：code 摘要执行单次使用；相同幂等键/相同 payload 不重复创建 Session。服务重建后同一幂等请求为原 Session 轮换新 token，以兼顾幂等恢复和“不持久化明文 token”。
+- Consent：冻结 API 没有强制 `accepted` 字段，因此“完整提交当前三个版本 + 有效 ISO 8601 `agreedAt` + `assessment-dialog` 来源”本身构成显式同意证据；如提交 `accepted` 只能为 `true`。校验成功后单独保存 `accepted=true`、Session/User、诊断、用途上下文和记录时间，再保存 Assessment 协议快照。
+- 时间规则：此前实现的“`agreedAt` 必须在最近 24 小时内”没有法律、微信平台或冻结 PRD 依据，属于未经记录的 Demo 假设，Phase 4 基线确认时已删除。现在不设置同意证据最大年龄；仅要求时间可解析，且不得明显晚于服务器时间（允许 5 分钟客户端时钟偏差）。该校验是 Demo 数据一致性设计，不是官方合规要求。协议是否因版本更新需要重新同意由版本匹配控制。
+- 禁止：Demo code 不等同 openid，不调用/伪造 `code2Session`，不读取 AppID/AppSecret，不在日志或错误中输出 code/token。
+
+## D-026 Phase 4 状态推进与 Report 列表语义
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：延续 D-015，以创建时间和可注入 clock 推进 `pending → processing → ready | failed`；默认 pending 300ms、八阶段各 200ms。查询状态、报告或列表时推进，重建服务后从 JSON 恢复。
+- Report：ready 时调用一次 Engine 和 ReportGenerator，先保存不可变 Report，再把 `reportId` 写回 Assessment；如果 Engine 或 Report 保存失败，Assessment 转为稳定 `failed` 并只暴露公共错误码/文案。
+- 列表：`GET /api/reports` 从当前用户 Assessment 汇总，以便同时表达无报告、处理中、完成和失败；只有 ready 项关联 Report 四类摘要。
+- 缺失数据：沿用 PRD 冻结逻辑，Scenario B 可以生成四类 `needs_data` 报告，不增加未经需求授权的硬阻断门。
+- 权限：诊断和报告所有权只取服务端 Session 的 `userId`，其他用户访问统一返回 404，客户端不能传 user ID 获得访问权。
+
+## D-027 Phase 4 JSON Runtime 一致性边界
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：sessions、consents、assessments、reports、leads 使用五个独立 JSON 集合；每次写入采用临时文件加原子替换，同一进程内通过 Promise 队列串行化单集合写入。
+- 错误处理：JSON 损坏时返回安全的 `INTERNAL_ERROR` 并保留原文件，不把损坏内容静默覆盖成空集合。
+- 限制：这不是数据库事务或跨进程锁，只承诺招聘 Demo 的单进程低并发；生产必须替换为事务数据库、迁移、备份和并发控制。
