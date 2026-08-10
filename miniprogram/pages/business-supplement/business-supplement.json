@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "补充经营数据",
+  "usingComponents": { "async-state": "/components/async-state/async-state" }
+}

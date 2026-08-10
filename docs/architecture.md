@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜技术架构与接口契约
 
-> 文档版本：Phase 4 / v1.2
+> 文档版本：Phase 5 / v1.3
 > 规格日期：2026-08-10  
-> 当前边界：Phase 4 已实现 Demo Auth、Session、协议快照、诊断状态机、Report 持久化/列表/详情和顾问线索 API；按本阶段明确指令未实现小程序页面或 Admin。
+> 当前边界：Phase 5 已实现原生小程序游客前置流程、统一 API Client、企业隔离草稿和动态表单；Phase 4 的 Demo Auth、Session、协议门、诊断、Report 和 Lead API 保持可用，但本阶段小程序不调用它们。Admin 与 Phase 6 UI 尚未实现。
 
 ## 1. 架构目标
 
@@ -756,3 +756,41 @@ Repository：Phase 2 的只读 `EnterpriseRepository` / `JsonEnterpriseRepositor
 - Phase 4 已实现 Auth、Session、协议门、状态机、报告和 Lead API。虽然早期 PLAN 将 Admin 查询 API 与 Phase 4 同列，本次明确指令禁止开发 Admin，因此 Admin 仍按 Phase 7 执行。
 - API 变更必须先更新本契约；字段或规则变更同步 PRD 和测试。
 - 未获得官方平台/审计/专家证据的定性项不得因实现便利从 `manual_review` 改为 `met`。
+
+## 21. Phase 5 小程序实际架构
+
+### 21.1 目录与页面
+
+```text
+project.config.json                 # miniprogramRoot=miniprogram/，本地 touristappid
+miniprogram/
+├── app.js / app.json / app.wxss / sitemap.json
+├── config/index.js                  # API base URL、timeout、申报年、TTL
+├── components/async-state/          # Loading/Empty/Error/Success 容器
+├── components/demo-badge/           # 虚构 Demo 持续标识
+├── services/api.js                  # 唯一 wx.request 入口
+├── services/draft.js                # 按 enterpriseId 隔离的 2 小时 TTL 草稿
+├── utils/form.js / format.js         # 可在 Node 中测试的表单/展示纯函数
+└── pages/
+    ├── home / report-list / me       # 三 Tab
+    ├── enterprise-search / enterprise-confirm / enterprise-profile
+    ├── business-supplement
+    └── legal                         # type 参数区分四类游客文档
+```
+
+### 21.2 API Client 与错误
+
+- `services/api.js` 集中配置 `http://127.0.0.1:3000`、10 秒超时、JSON envelope 解包和 `ApiError`。页面不直接调用 `wx.request`。
+- Phase 5 仅导出 `searchEnterprises/getEnterprise/getMissingFields`，不导出或调用 Auth、Assessment Create、Report 或 Lead 客户端方法。
+- 错误页只展示服务端公共文案与可选 request ID；不透传 stack、路径或上游原始响应。
+
+### 21.3 草稿与动态表单
+
+- Storage key 为 `qualification-draft:<enterpriseId>`；草稿含 `version/enterpriseId/supplements/updatedAt/expiresAt`，默认 TTL 2 小时。另有当前企业 key，不把 A 企业补数合并到 B。
+- 前端为每个 schema 字段生成 `{ value, unit?, period? }`；Backend `mergeSupplementalData` 负责将来源标记为 `sourceType=user/sourceLabel=user_supplied`，规则逻辑不进入页面。
+- 实际 schema 类型覆盖 `money/integer/boolean/enum/list`，工具函数也可安全处理 `number/text/date`。`0` 和 `false` 通过显式空值判断保留。
+- 点击保存时先做前端类型/范围校验，再向 missing-fields 提交新旧 supplements；只有 Backend 校验与重算成功后才写入本地草稿。
+
+### 21.4 本地与发布网络边界
+
+`project.config.json` 的 `urlCheck=false` 只服务微信开发者工具本地 Demo。真机中 `127.0.0.1` 指向手机自身；真机/发布必须改用 HTTPS 合法域名、微信后台 request 域名配置和正式服务端安全配置。`touristappid` 不代表生产 AppID，仓库中不包含 AppSecret。

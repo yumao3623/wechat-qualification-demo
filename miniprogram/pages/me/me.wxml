@@ -1,0 +1,13 @@
+<view class="page">
+  <view class="profile-card card">
+    <view class="avatar">游</view>
+    <view><view class="guest-title">游客模式</view><view class="muted small">可免登录完成企业搜索、确认、画像与补数</view></view>
+  </view>
+  <view class="card menu-card">
+    <view wx:for="{{items}}" wx:key="type" class="menu-item" data-type="{{item.type}}" bindtap="openLegal">
+      <view><view class="menu-title">{{item.title}}</view><view class="menu-desc">{{item.desc}}</view></view>
+      <view class="arrow">›</view>
+    </view>
+  </view>
+  <view class="notice">当前没有登录状态，因此不显示“退出登录”。法律与帮助页始终对游客开放。</view>
+</view>

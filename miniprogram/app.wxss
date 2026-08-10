@@ -1,0 +1,135 @@
+page {
+  min-height: 100%;
+  background: #f4f7f9;
+  color: #173042;
+  font-size: 30rpx;
+  line-height: 1.55;
+}
+
+.page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 32rpx 28rpx 56rpx;
+}
+
+.card {
+  margin-bottom: 24rpx;
+  padding: 30rpx;
+  border: 1rpx solid #dce6eb;
+  border-radius: 24rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 30rpx rgba(31, 67, 88, 0.05);
+}
+
+.eyebrow {
+  color: #0c6b68;
+  font-size: 24rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.page-title {
+  margin: 10rpx 0 12rpx;
+  color: #102d40;
+  font-size: 44rpx;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.section-title {
+  margin-bottom: 20rpx;
+  color: #15384d;
+  font-size: 32rpx;
+  font-weight: 650;
+}
+
+.muted { color: #6d7d87; }
+.small { font-size: 24rpx; }
+
+.notice {
+  padding: 22rpx 24rpx;
+  border-left: 6rpx solid #d58d29;
+  border-radius: 14rpx;
+  background: #fff8e9;
+  color: #72521c;
+  font-size: 25rpx;
+}
+
+.primary-button,
+.secondary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 92rpx;
+  border-radius: 18rpx;
+  font-size: 30rpx;
+  font-weight: 650;
+}
+
+.primary-button {
+  border: 0;
+  background: #0c6b68;
+  color: #ffffff;
+}
+
+.primary-button[disabled] {
+  background: #a9bebc;
+  color: #edf3f3;
+}
+
+.secondary-button {
+  border: 1rpx solid #aac1cc;
+  background: #ffffff;
+  color: #244b60;
+}
+
+.button-stack > button + button { margin-top: 18rpx; }
+
+.field-label {
+  display: block;
+  margin-bottom: 12rpx;
+  color: #28495c;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.text-input,
+.textarea,
+.picker-value {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 88rpx;
+  padding: 22rpx 24rpx;
+  border: 1rpx solid #cbd9df;
+  border-radius: 16rpx;
+  background: #ffffff;
+  color: #173042;
+}
+
+.textarea { min-height: 180rpx; }
+
+.field-error {
+  margin-top: 10rpx;
+  color: #a43d31;
+  font-size: 24rpx;
+}
+
+.step {
+  margin-bottom: 14rpx;
+  color: #0c6b68;
+  font-size: 24rpx;
+  font-weight: 650;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.divider {
+  height: 1rpx;
+  margin: 20rpx 0;
+  background: #e5ecef;
+}

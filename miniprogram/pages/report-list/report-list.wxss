@@ -1,0 +1,3 @@
+.report-page { padding-top: 100rpx; text-align: center; }
+.empty-illustration { width: 120rpx; height: 120rpx; margin: 0 auto 28rpx; border-radius: 50%; background: #e4f1f1; color: #0c6b68; font-size: 70rpx; line-height: 120rpx; }
+.reason-card { margin-top: 36rpx; text-align: left; }

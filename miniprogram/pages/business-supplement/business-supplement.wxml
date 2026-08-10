@@ -1,0 +1,41 @@
+<view class="page">
+  <view class="step">STEP 3 / 3 · 补充关键数据</view>
+  <view class="page-title">仅填写当前判断缺少的信息</view>
+  <view class="muted">字段由 Backend 动态返回。可先填部分并保存，页面会重新请求剩余 schema。</view>
+  <view wx:if="{{savedCount}}" class="draft-status">本机草稿已保存 {{savedCount}} 项用户补充数据</view>
+
+  <async-state state="{{state}}" message="{{state === 'loading' ? '正在计算当前缺失字段' : state === 'empty' ? '关键数据已准备' : errorMessage}}" detail="{{state === 'empty' ? '草稿已留在本次游客流程中；本阶段不登录、不发起诊断。' : requestId}}" bindretry="loadSchema">
+    <view wx:if="{{state === 'success'}}">
+      <view wx:for="{{fields}}" wx:key="key" class="field-card card">
+        <view class="row field-heading">
+          <view class="field-title">{{item.label}}</view>
+          <view wx:if="{{item.blocking}}" class="required">当前缺失</view>
+        </view>
+        <view class="field-meta">{{item.periodText}}<text wx:if="{{item.unitText}}"> · 单位 {{item.unitText}}</text></view>
+        <view class="field-help">{{item.helpText}}</view>
+        <view class="field-use">影响规则：{{item.requiredForText}}</view>
+
+        <input wx:if="{{item.type === 'money' || item.type === 'integer' || item.type === 'number'}}" class="text-input control" type="digit" value="{{rawValues[item.key]}}" placeholder="请输入非负数" data-key="{{item.key}}" bindinput="onValueInput" />
+
+        <radio-group wx:elif="{{item.type === 'boolean'}}" class="boolean-group" data-key="{{item.key}}" bindchange="onBooleanChange">
+          <label class="boolean-option"><radio value="true" checked="{{rawValues[item.key] === true}}" color="#0c6b68" />是</label>
+          <label class="boolean-option"><radio value="false" checked="{{rawValues[item.key] === false}}" color="#0c6b68" />否</label>
+        </radio-group>
+
+        <picker wx:elif="{{item.type === 'enum'}}" mode="selector" range="{{item.enumLabels}}" data-key="{{item.key}}" bindchange="onEnumChange">
+          <view class="picker-value control">{{rawValues[item.key] ? (rawValues[item.key] === 'sales_revenue' ? '按销售收入口径' : '按成本费用口径') : '请选择'}}</view>
+        </picker>
+
+        <textarea wx:elif="{{item.type === 'list'}}" class="textarea control" value="{{rawValues[item.key]}}" placeholder="每行填写一项；详细权属、类型与有效性仍需后续核验" data-key="{{item.key}}" bindinput="onValueInput" />
+
+        <input wx:else class="text-input control" value="{{rawValues[item.key]}}" placeholder="请填写" data-key="{{item.key}}" bindinput="onValueInput" />
+        <view wx:if="{{errors[item.key]}}" class="field-error">{{errors[item.key]}}</view>
+      </view>
+      <view wx:if="{{saveMessage}}" class="save-message">{{saveMessage}}</view>
+      <button class="primary-button" bindtap="saveAndRecalculate">保存并重新计算缺失项</button>
+      <button class="secondary-button back-button" bindtap="backToProfile">返回企业画像</button>
+    </view>
+  </async-state>
+  <button wx:if="{{state === 'empty'}}" class="secondary-button empty-back" bindtap="backToProfile">返回企业画像</button>
+  <view class="notice footer-notice">补充数据会标记为“用户补充”，只保存在当前小程序本地草稿中，2 小时后过期。</view>
+</view>

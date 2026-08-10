@@ -1,0 +1,22 @@
+.state-card {
+  padding: 70rpx 34rpx;
+  border: 1rpx solid #dce6eb;
+  border-radius: 24rpx;
+  background: #ffffff;
+  text-align: center;
+}
+.state-title { margin-top: 18rpx; color: #23475b; font-size: 30rpx; font-weight: 650; }
+.state-detail { margin-top: 10rpx; color: #72808c; font-size: 25rpx; }
+.state-icon { color: #4e7f8d; font-size: 52rpx; font-weight: 700; }
+.error-state .state-icon { color: #a43d31; }
+.retry { width: 240rpx; margin-top: 28rpx; border: 0; border-radius: 16rpx; background: #0c6b68; color: #fff; font-size: 28rpx; }
+.spinner {
+  width: 42rpx;
+  height: 42rpx;
+  margin: 0 auto;
+  border: 6rpx solid #d7e6e7;
+  border-top-color: #0c6b68;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

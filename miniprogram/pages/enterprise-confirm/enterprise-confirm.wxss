@@ -1,0 +1,8 @@
+.detail { margin-top: 28rpx; }
+.title-row { align-items: flex-start; margin-bottom: 24rpx; }
+.company-name { flex: 1; color: #14384c; font-size: 34rpx; font-weight: 720; }
+.detail-row { display: flex; justify-content: space-between; gap: 32rpx; padding: 20rpx 0; border-top: 1rpx solid #e8eef1; font-size: 27rpx; }
+.detail-row text:first-child { flex: 0 0 180rpx; color: #71808a; }
+.detail-row text:last-child { flex: 1; color: #203e51; text-align: right; }
+.demo-notice { margin-top: 24rpx; }
+.actions { margin-top: 28rpx; }

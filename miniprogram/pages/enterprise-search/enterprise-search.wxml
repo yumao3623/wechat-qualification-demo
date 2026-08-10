@@ -1,0 +1,22 @@
+<view class="page">
+  <view class="step">STEP 1 / 3 · 选择企业</view>
+  <view class="page-title">搜索虚构 Demo 企业</view>
+  <view class="muted">搜索结果来自本地 Backend，不是企查查或真实工商数据。</view>
+  <view class="search-card card">
+    <label class="field-label">企业名称关键词</label>
+    <input class="text-input" value="{{keyword}}" placeholder="例如：云舟、Demo" maxlength="50" confirm-type="search" bindinput="onKeywordInput" bindconfirm="submitSearch" />
+    <view wx:if="{{validationError}}" class="field-error">{{validationError}}</view>
+    <button class="primary-button search-button" loading="{{state === 'loading'}}" disabled="{{state === 'loading'}}" bindtap="submitSearch">搜索</button>
+  </view>
+
+  <async-state state="{{state}}" message="{{state === 'loading' ? '正在搜索 Demo 企业' : state === 'empty' ? '未找到匹配的虚构 Demo 企业' : errorMessage}}" detail="{{state === 'empty' ? '请更换关键词，例如“Demo”、“云舟”或“宁波”。' : requestId}}" bindretry="retry">
+    <view wx:if="{{state === 'success'}}">
+      <view wx:for="{{results}}" wx:key="id" class="result card" data-id="{{item.id}}" bindtap="selectEnterprise">
+        <view class="row"><view class="result-name">{{item.name}}</view><demo-badge /></view>
+        <view class="result-meta">{{item.subjectCode}} · {{item.registrationRegion.city}} {{item.registrationRegion.district}}</view>
+        <view class="result-meta">{{item.industry.name}} · {{item.legalStatus === 'active' ? '存续' : item.legalStatus}}</view>
+        <view class="result-action">查看并确认 →</view>
+      </view>
+    </view>
+  </async-state>
+</view>

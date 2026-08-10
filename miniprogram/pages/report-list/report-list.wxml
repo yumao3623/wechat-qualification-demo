@@ -1,0 +1,10 @@
+<view class="page report-page">
+  <view class="empty-illustration">◎</view>
+  <view class="page-title">诊断完成后可在这里查看报告</view>
+  <view class="muted">当前是 Phase 5 游客预备流程。进入本 Tab 不会登录、不会授权，也不会创建 Session。</view>
+  <view class="card reason-card">
+    <view class="section-title">为什么后续查看保存报告需要登录？</view>
+    <view class="muted">登录只用于识别并隔离用户自己的诊断记录。完整登录与报告能力将在后续阶段接入。</view>
+  </view>
+  <button class="primary-button" bindtap="startAssessment">返回首页开始准备</button>
+</view>

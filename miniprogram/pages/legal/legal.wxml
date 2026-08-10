@@ -1,0 +1,10 @@
+<view class="page">
+  <view class="eyebrow">招聘演示项目</view>
+  <view class="page-title">{{document.title}}</view>
+  <view class="document-meta">版本：{{document.version}} · 生效/更新日期：{{document.effectiveDate}}</view>
+  <view wx:for="{{document.sections}}" wx:key="heading" class="card section-card">
+    <view class="section-title">{{item.heading}}</view>
+    <view wx:for="{{item.paragraphs}}" wx:key="*this" class="paragraph">{{item}}</view>
+  </view>
+  <view class="notice">本页不要求用户点击同意，访问或返回都不会触发登录、授权或诊断。</view>
+</view>

@@ -1,0 +1,15 @@
+.summary .row { align-items: flex-start; margin-bottom: 12rpx; }
+.company-name { flex: 1; color: #14384c; font-size: 33rpx; font-weight: 700; }
+.count { color: #0c6b68; }
+.warning { color: #b96b16; }
+.profile-row { display: flex; justify-content: space-between; gap: 24rpx; padding: 20rpx 0; border-top: 1rpx solid #e8eef1; }
+.profile-row:first-of-type { border-top: 0; }
+.profile-label { color: #28495c; font-size: 27rpx; font-weight: 620; }
+.profile-meta { margin-top: 5rpx; color: #7a8992; font-size: 22rpx; }
+.profile-value { flex: 0 0 200rpx; color: #173c50; font-size: 26rpx; text-align: right; }
+.user-card { border-color: #9ccac6; }
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.chip { padding: 9rpx 16rpx; border-radius: 999rpx; background: #f6ece2; color: #8a561e; font-size: 23rpx; }
+.need-row { padding: 18rpx 0; border-top: 1rpx solid #e8eef1; }
+.schema-intro { margin-bottom: 14rpx; }
+.supplement-button { margin-top: 24rpx; }

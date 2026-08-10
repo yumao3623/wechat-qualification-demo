@@ -1,0 +1,10 @@
+.hero { padding: 42rpx 34rpx; background: linear-gradient(145deg, #0b3654, #0c6b68); color: #fff; }
+.hero .eyebrow { color: #a9e0db; }
+.hero-title { margin-top: 18rpx; font-size: 52rpx; font-weight: 750; line-height: 1.24; }
+.hero-desc { margin-top: 20rpx; color: #d8eaee; font-size: 28rpx; }
+.hero-cta { margin-top: 34rpx; background: #ffffff; color: #0b5d5b; }
+.privacy-note { margin-top: 18rpx; color: #c9e1e5; font-size: 23rpx; text-align: center; }
+.qualification-name { color: #13394e; font-size: 31rpx; font-weight: 680; }
+.qualification-desc { margin-top: 8rpx; color: #687a85; font-size: 26rpx; }
+.journey-row { display: flex; align-items: center; gap: 18rpx; margin-top: 20rpx; }
+.number { display: inline-flex; align-items: center; justify-content: center; width: 46rpx; height: 46rpx; border-radius: 50%; background: #e5f3f2; color: #0c6b68; font-weight: 700; }

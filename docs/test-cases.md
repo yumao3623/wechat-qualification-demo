@@ -1,8 +1,8 @@
 # 企业政府资质预评估微信小程序 Demo｜测试用例与需求追踪
 
-> 文档版本：Phase 4 / v1.3
+> 文档版本：Phase 5 / v1.5
 > 规格日期：2026-08-10  
-> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 4 共 68 tests / 68 PASS，并完成真实 HTTP 后端链路；小程序、DevTools、真机和 Admin 继续保持 `NOT EXECUTED`。
+> 最近执行：2026-08-10，Node.js v24.14.0（满足项目 `>=20` 约束），Windows，Mock Provider + Demo Auth。Phase 5 共 74 tests / 74 PASS，真实 HTTP 游客链路通过；用户已在微信开发者工具完成 Phase 5 人工 E2E 清单并报告全部 PASS。真机、Phase 6 和 Admin 仍保持 `NOT EXECUTED`。
 
 ## 1. 状态与执行规则
 
@@ -16,11 +16,11 @@
 
 | Test ID | Module | Type | Precondition | Steps | Expected | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| UI-GUEST-001 | 首页游客访问 | DevTools E2E | 清空本地存储，冷启动 | 打开小程序并停留首页 | 首页可浏览；无 `wx.login`、手机号授权或协议弹窗；显示价值、四类资质、CTA 和免责声明 | NOT EXECUTED |
-| UI-NAV-001 | Tab 导航 | DevTools E2E | 游客状态 | 依次打开首页、报告、我的 Tab，再返回首页 | 三 Tab 可切换；未登录报告 Tab 不自动授权；我的法律入口可见 | NOT EXECUTED |
-| UI-NAV-002 | 普通页返回 | DevTools E2E | 已进入主体确认 | 返回搜索并再次选择另一企业 | 导航正确；不保留旧企业上下文或补充值 | NOT EXECUTED |
+| UI-GUEST-001 | 首页游客访问 | DevTools E2E | 清空本地存储，冷启动 | 打开小程序并停留首页 | 首页可浏览；无 `wx.login`、手机号授权或协议弹窗；显示价值、四类资质、CTA 和免责声明 | PASS |
+| UI-NAV-001 | Tab 导航 | DevTools E2E | 游客状态 | 依次打开首页、报告、我的 Tab，再返回首页 | 三 Tab 可切换；未登录报告 Tab 不自动授权；我的法律入口可见 | PASS |
+| UI-NAV-002 | 普通页返回 | DevTools E2E | 已进入主体确认 | 返回搜索并再次选择另一企业 | 导航正确；不保留旧企业上下文或补充值 | PASS |
 | UI-STATE-001 | 通用四态 | DevTools E2E | 可注入 Loading/Empty/Error/Success | 逐页触发四态 | 状态布局、文案、按钮可见；Error 不展示内部堆栈 | NOT EXECUTED |
-| UI-LEGAL-001 | 法律/帮助 | DevTools E2E | 游客状态 | 从我的打开使用说明、隐私、协议、免责声明 | 均可免登录查看；标题、版本、生效日期和正文存在 | NOT EXECUTED |
+| UI-LEGAL-001 | 法律/帮助 | DevTools E2E | 游客状态 | 从我的打开使用说明、隐私、协议、免责声明 | 均可免登录查看；标题、版本、生效日期和正文存在 | PASS |
 
 ## 3. Enterprise Provider、搜索、确认与画像
 
@@ -32,14 +32,14 @@
 | ENT-PROV-004 | Mock Provider 不存在 ID | Unit | 不存在 ID | 查询详情 | Provider 返回 `null`，service 映射为 404 | PASS |
 | ENT-PROV-005 | Provider 契约 | Contract | Mock 与未来测试替身 | 对两个实现执行同一契约套件 | 不透传供应商结构；未知为 `null`；错误类别一致 | NOT EXECUTED |
 | ENT-DATA-001 | fixture 一致性 | Unit | A/B/C/D fixture | 校验 ID、人数、收入、比例、统计期 | ID 唯一；研发人数≤总人数；主营≤营收；期间和单位有效 | PASS |
-| ENT-SEARCH-001 | 搜索成功 | DevTools E2E | 游客，API 正常 | 输入合法关键词并搜索 | 显示 Loading 后展示匹配虚构企业及 Demo 标签 | NOT EXECUTED |
-| ENT-SEARCH-002 | 搜索无结果 | DevTools E2E | 游客，API 正常 | 输入无匹配关键词 | 显示 Empty 和更换关键词入口，不伪造企业 | NOT EXECUTED |
+| ENT-SEARCH-001 | 搜索成功 | DevTools E2E | 游客，API 正常 | 输入合法关键词并搜索 | 显示 Loading 后展示匹配虚构企业及 Demo 标签 | PASS |
+| ENT-SEARCH-002 | 搜索无结果 | DevTools E2E | 游客，API 正常 | 输入无匹配关键词 | 显示 Empty 和更换关键词入口，不伪造企业 | PASS |
 | ENT-SEARCH-003 | 搜索校验 | API/UI | 游客 | 提交空、1 字、>50 字关键词 | 返回/显示字段级校验；不发无效搜索或服务端返回 400 | NOT EXECUTED |
 | ENT-SEARCH-004 | 搜索故障 | DevTools E2E | 注入 503 | 发起搜索 | 显示可重试错误，不显示上游响应或堆栈 | NOT EXECUTED |
 | ENT-SEARCH-005 | 搜索竞态 | Frontend unit/E2E | 可控制两次请求先后 | 快速提交 A 后提交 B，让 A 后返回 | 页面只显示最新 B 的结果 | NOT EXECUTED |
-| ENT-CONFIRM-001 | 主体确认 | DevTools E2E | 已选择企业 | 查看关键字段并确认 | 名称、Demo 编号、法人、日期、资本、地区、状态、行业可见；进入画像 | NOT EXECUTED |
-| ENT-CONFIRM-002 | 返回重选 | DevTools E2E | 企业 A 已有草稿 | 返回并选择企业 B | A 的草稿/schema 不进入 B | NOT EXECUTED |
-| ENT-PROFILE-001 | 企业画像分组 | DevTools E2E | B 场景部分字段缺失 | 打开画像 | 已获取、缺失、需补充/核验分区正确，显示来源和期间 | NOT EXECUTED |
+| ENT-CONFIRM-001 | 主体确认 | DevTools E2E | 已选择企业 | 查看关键字段并确认 | 名称、Demo 编号、法人、日期、资本、地区、状态、行业可见；进入画像 | PASS |
+| ENT-CONFIRM-002 | 返回重选 | DevTools E2E | 企业 A 已有草稿 | 返回并选择企业 B | A 的草稿/schema 不进入 B | PASS |
+| ENT-PROFILE-001 | 企业画像分组 | DevTools E2E | B 场景部分字段缺失 | 打开画像 | 已获取、缺失、需补充/核验分区正确，显示来源和期间 | PASS |
 | ENT-PROFILE-002 | 画像 API 失败 | DevTools E2E | 注入详情 503 | 打开画像并重试 | 显示 Error；重试成功后正常恢复 | NOT EXECUTED |
 
 ## 4. 动态字段与补充数据
@@ -52,7 +52,7 @@
 | FORM-004 | 无效期间 | Unit | 有 2024 值但规则需要 2025 | 计算缺失 | 标记 `invalid_period` 并要求 2025 值，不误用旧数据 | PASS |
 | FORM-005 | 单位错误 | Unit/API | 金额字段单位缺失或错误 | 请求 missing-fields/提交补数 | 返回 422 或字段错误，不进入评估 | PASS |
 | FORM-006 | 地域裁剪 | Unit | 企业注册地非杭州 | 生成 schema | 不为杭州新雏鹰单独询问字段；该资质预期不适用 | PASS |
-| FORM-007 | 动态页面渲染 | DevTools E2E | B 场景 | 进入补充页 | 只渲染服务端 schema；标签、单位、期间、用途、帮助可见 | NOT EXECUTED |
+| FORM-007 | 动态页面渲染 | DevTools E2E | B 场景 | 进入补充页 | 只渲染服务端 schema；标签、单位、期间、用途、帮助可见 | PASS |
 | FORM-008 | 补数影响结果 | Integration/E2E | B 场景初始缺研发数据 | 记录初始 missing；补齐有效值；重新评估 | 缺失 schema 减少，报告 criterion/总体状态按规则真实变化 | PASS |
 | FORM-009 | 数据冲突 | Unit/E2E | Provider 与用户给出不同非空值 | 提交补充 | 保留两个来源并要求确认/人工核验，不静默覆盖 | PASS |
 | FORM-010 | 草稿 TTL | Frontend unit/E2E | 已保存敏感草稿 | 模拟未过期、过期、创建成功、退出 | 未过期可恢复；过期/成功/退出后清理；日志无草稿 | NOT EXECUTED |
@@ -66,7 +66,7 @@
 | CONSENT-003 | 关闭/拒绝 | DevTools E2E | 弹窗打开 | 点击关闭或暂不发起 | 返回原页；仍可游客浏览；无登录/诊断 | NOT EXECUTED |
 | CONSENT-004 | 明确同意时序 | DevTools E2E | 弹窗未勾选 | 勾选并确认，观察调用 | 先同意，再调用 `wx.login`，Session 成功后才创建诊断 | NOT EXECUTED |
 | CONSENT-005 | 服务端协议门 | Integration | 有 Session | 缺一版本、未同意、时间无效、来源错误分别创建 | 均返回 409/400；不保存 assessment | PASS |
-| AUTH-001 | 首次无自动登录 | DevTools E2E | 清空状态 | 冷启动、切 Tab、浏览游客页面 | 全程不调用 `wx.login`，直到用户明确触发 | NOT EXECUTED |
+| AUTH-001 | 首次无自动登录 | DevTools E2E | 清空状态 | 冷启动、切 Tab、浏览游客页面 | 全程不调用 `wx.login`，直到用户明确触发 | PASS |
 | AUTH-002 | Demo 登录成功 | Integration | 合法非空 code | POST `/auth/login` | 返回随机 token 一次、`authMode=demo`、有效期；Repository 仅存摘要 | PASS |
 | AUTH-003 | 登录输入校验 | Integration | 无 Session | 提交空、超长或类型错误 code | 返回 400；不创建 Session；日志无 code | PASS |
 | AUTH-004 | 登录失败恢复 | DevTools E2E | 注入 `wx.login` 或后端失败 | 明确同意并发起 | 显示尚未创建诊断；可重试/关闭；游客功能仍可用 | NOT EXECUTED |
@@ -140,7 +140,7 @@
 | RPT-TAB-003 | 报告 Tab 进行中 | DevTools E2E | pending/processing | 打开报告 Tab | 显示企业、阶段和进度入口 | NOT EXECUTED |
 | RPT-TAB-004 | 报告 Tab 已完成 | DevTools E2E | ready | 打开报告 Tab | 显示报告摘要并可进入详情 | NOT EXECUTED |
 | RPT-TAB-005 | 报告 Tab 失败 | DevTools E2E | failed | 打开报告 Tab | 显示失败原因和恢复入口，不显示空报告 | NOT EXECUTED |
-| COPY-001 | 禁止承诺文案 | Static | 代码/fixture/文档完成 | 扫描面向用户文案 | 不出现保证通过、一定符合、已获资质、官方通过、保证补贴等承诺 | NOT EXECUTED |
+| COPY-001 | 禁止承诺文案 | Static | 代码/fixture/文档完成 | 扫描面向用户文案 | 不出现保证通过、一定符合、已获资质、官方通过、保证补贴等承诺 | PASS |
 
 ## 9. 顾问、Admin、安全与异常 API
 
@@ -330,3 +330,41 @@ logout 后访问个人报告 HTTP 401
 实际步骤：启动 Backend → POST Demo Login → 提交三个协议版本及同意时间 → POST Assessment → 轮询 Status → 获取 Report → 查询 Report List → DELETE Session → 使用旧 token 查询 Report。运行数据写入独立临时目录并在验证后清理；输出未打印 Session token。
 
 Phase 4 仍为 `NOT EXECUTED`：所有微信小程序/DevTools/真机 UI 用例、协议 checkbox 默认值的 UI 行为、前端草稿 TTL、Report Tab/My Tab、Admin 与完整小程序 E2E。不得用后端 PASS 替代这些状态。
+
+## 16. Phase 5 执行记录
+
+自动测试命令（Codex 桌面验证进程临时使用 bundled Node；项目脚本仍为可移植的 `node --test`）：
+
+```text
+pnpm test
+```
+
+结果：74 tests，74 PASS，0 FAIL，0 skipped；包含 Phase 2–4 的 68 项全量回归。
+
+| Test ID | Module | Type | 实际结果 | Status |
+| --- | --- | --- | --- | --- |
+| P5-FORM-001 | 动态表单纯函数 | Frontend Unit | `money/integer/boolean/enum/list` 序列化、单位/期间、负数/整数校验通过；`0/false` 保留 | PASS |
+| P5-DRAFT-001 | 游客草稿 | Frontend Unit | A/B 企业草稿按 ID 隔离；TTL 内恢复、过期清理通过 | PASS |
+| P5-API-001 | API 错误映射 | Frontend Unit | 保留安全用户文案、字段和 request ID，不透传额外内部字段 | PASS |
+| P5-STATIC-001 | 小程序结构 | Static/Unit | `app.json` 注册页均有 JS/JSON/WXML/WXSS；三 Tab 路径正确；`wx.request` 只出现在统一 API Client | PASS |
+| P5-STATIC-002 | 游客边界 | Static/Unit | `wx.login` / `getPhoneNumber` / `getUserProfile` / `/api/auth/login` 调用均为 0 | PASS |
+| P5-HTTP-001 | 搜索与详情 | Real HTTP | `GET /enterprises?keyword=Demo` 返回 4 家且全部 `isDemoData=true`；B 详情 200/provider=mock | PASS |
+| P5-HTTP-002 | 缺失字段重算 | Real HTTP | B 初始 20 项，补充 `rdEmployeeCount.2025` 后再请求为 19 项 | PASS |
+| P5-DEVTOOLS-001 | 小程序编译/基础页面 | DevTools E2E | 用户实际导入项目；首页显示、三 Tab、四个法律/帮助页全部通过 | PASS |
+| P5-DEVTOOLS-002 | 游客完整前置流 | DevTools E2E | 用户实际执行搜索、Empty、确认/返回、画像、动态补数 | 全部 PASS；B 场景缺失字段从 20 减少到 19 | PASS |
+| P5-DEVTOOLS-003 | 草稿与企业隔离 | DevTools E2E | 返回画像、再进入，然后切换企业 | 草稿可恢复；不同企业不串补充数据 | PASS |
+| P5-DEVTOOLS-004 | Console / Network | DevTools E2E | 完整操作期间观察调试器 | Console 无红色业务错误；Network 无登录、诊断创建或报告请求 | PASS |
+| P5-DEVTOOLS-005 | 错误与重试 | DevTools E2E | 停止 Backend 后请求，恢复 Backend 后重试 | 错误文案与重试恢复通过，无内部堆栈 | PASS |
+| P5-DEVICE-001 | 真机网络/布局 | Device E2E | 未配置 HTTPS 合法域名，未真机执行 | NOT EXECUTED |
+
+真实 HTTP 输出摘要：
+
+```text
+searchStatus=200, searchCount=4, allSearchItemsDemo=true
+detailStatus=200, detailProvider=mock
+initialMissingCount=20
+supplementedKey=rdEmployeeCount.2025
+recalculatedStatus=200, remainingMissingCount=19, reduced=true
+```
+
+Phase 5 开发者工具验证证据来自用户于 2026-08-10 按人工清单执行后提供的逐项 PASS 结果。本次没有验证草稿等待 2 小时后真实过期、多屏幕尺寸/键盘遮挡、前后台生命周期或真机网络，相关细分用例仍保持 `NOT EXECUTED`。Phase 6 协议/登录/诊断/报告/顾问用例也保持 `NOT EXECUTED`。

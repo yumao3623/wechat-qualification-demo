@@ -1,0 +1,5 @@
+.search-card { margin-top: 28rpx; }
+.search-button { margin-top: 22rpx; }
+.result-name { flex: 1; padding-right: 14rpx; color: #14384c; font-size: 30rpx; font-weight: 680; }
+.result-meta { margin-top: 12rpx; color: #6e7d86; font-size: 25rpx; }
+.result-action { margin-top: 22rpx; color: #0c6b68; font-size: 26rpx; font-weight: 650; }

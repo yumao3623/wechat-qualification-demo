@@ -1,0 +1,49 @@
+<view class="page">
+  <view class="step">STEP 2 / 3 · 企业画像</view>
+  <view class="page-title">查看当前企业画像</view>
+  <async-state state="{{state}}" message="{{state === 'loading' ? '正在构建企业画像' : errorMessage}}" detail="{{requestId}}" bindretry="loadProfile">
+    <view wx:if="{{state === 'success'}}">
+      <view class="summary card">
+        <view class="row"><view class="company-name">{{enterprise.name}}</view><demo-badge /></view>
+        <view class="muted small">{{enterprise.subjectCode}} · {{enterprise.regionText}} · {{enterprise.industry.name}}</view>
+      </view>
+
+      <view class="card">
+        <view class="section-title">已获取 <text class="count">{{knownFields.length}}</text></view>
+        <view wx:for="{{knownFields}}" wx:key="key" class="profile-row">
+          <view><view class="profile-label">{{item.label}}</view><view class="profile-meta">{{item.periodText}} · {{item.sourceText}}</view></view>
+          <view class="profile-value">{{item.valueText}}</view>
+        </view>
+      </view>
+
+      <view wx:if="{{supplementedFields.length}}" class="card user-card">
+        <view class="section-title">已补充 <text class="count">{{supplementedFields.length}}</text></view>
+        <view wx:for="{{supplementedFields}}" wx:key="key" class="profile-row">
+          <view><view class="profile-label">{{item.label}}</view><view class="profile-meta">{{item.sourceText}}</view></view>
+          <view class="profile-value">{{item.valueText}}</view>
+        </view>
+      </view>
+
+      <view class="card">
+        <view class="section-title">画像中缺失 <text class="count warning">{{missingFields.length}}</text></view>
+        <view wx:if="{{missingFields.length}}" class="chip-wrap"><text wx:for="{{missingFields}}" wx:key="key" class="chip">{{item.label}}</text></view>
+        <view wx:else class="muted">当前 Provider 画像未标注明确空值。</view>
+      </view>
+
+      <view class="card">
+        <view class="section-title">当前判断需补充</view>
+        <async-state state="{{schemaState}}" message="{{schemaState === 'loading' ? '正在计算动态缺失字段' : schemaState === 'empty' ? '当前关键数据已准备' : schemaError}}" detail="{{schemaState === 'empty' ? '本阶段可返回继续浏览；不会发起登录或诊断。' : schemaRequestId}}" bindretry="loadSchema">
+          <view wx:if="{{schemaState === 'success'}}">
+            <view class="muted schema-intro">这些字段由 Backend Rule Engine 需求动态计算，共 {{supplementFields.length}} 项。</view>
+            <view wx:for="{{supplementFields}}" wx:key="key" class="need-row">
+              <view class="profile-label">{{item.label}}</view>
+              <view class="profile-meta">影响 {{item.requiredForText}} · {{item.periodText}}</view>
+            </view>
+            <button class="primary-button supplement-button" bindtap="openSupplement">补充关键数据</button>
+          </view>
+        </async-state>
+      </view>
+      <view class="notice">用户补充值仅作为本次 Demo 草稿，不等于审计、官方平台或主管部门已核验。</view>
+    </view>
+  </async-state>
+</view>

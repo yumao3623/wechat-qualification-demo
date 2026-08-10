@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "企业画像",
+  "usingComponents": {
+    "async-state": "/components/async-state/async-state",
+    "demo-badge": "/components/demo-badge/demo-badge"
+  }
+}

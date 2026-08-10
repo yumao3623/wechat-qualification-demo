@@ -1,0 +1,14 @@
+.draft-status { margin: 24rpx 0; padding: 16rpx 20rpx; border-radius: 14rpx; background: #e8f4f3; color: #0b6562; font-size: 24rpx; }
+.field-card:first-child { margin-top: 28rpx; }
+.field-heading { align-items: flex-start; }
+.field-title { flex: 1; color: #173d51; font-size: 31rpx; font-weight: 680; }
+.required { padding: 5rpx 11rpx; border-radius: 999rpx; background: #fff0df; color: #a85b0d; font-size: 21rpx; }
+.field-meta { margin-top: 10rpx; color: #5f7784; font-size: 24rpx; }
+.field-help { margin-top: 14rpx; color: #586d79; font-size: 25rpx; }
+.field-use { margin-top: 10rpx; color: #8a681d; font-size: 22rpx; }
+.control { margin-top: 22rpx; }
+.boolean-group { display: flex; gap: 50rpx; margin-top: 24rpx; }
+.boolean-option { display: flex; align-items: center; gap: 10rpx; }
+.save-message { margin: 20rpx 0; padding: 20rpx; border-radius: 14rpx; background: #eef5f7; color: #345669; font-size: 25rpx; }
+.back-button, .empty-back { margin-top: 18rpx; }
+.footer-notice { margin-top: 28rpx; }
