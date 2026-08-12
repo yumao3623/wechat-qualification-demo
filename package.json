@@ -6,7 +6,8 @@
   "main": "server/src/server.js",
   "scripts": {
     "start": "node server/src/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "package:delivery": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-delivery.ps1"
   },
   "engines": {
     "node": ">=20"

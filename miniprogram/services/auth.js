@@ -1,5 +1,5 @@
 const api = require('./api');
-const { CLIENT_VERSION } = require('../config/index');
+const { ALLOW_DEMO_LOGIN_FALLBACK, CLIENT_VERSION } = require('../config/index');
 const { createIdempotencyKey } = require('../utils/idempotency');
 
 const SESSION_STORAGE_KEY = 'qualification-demo-session';
@@ -39,6 +39,10 @@ function wxLogin(wxApi = wx) {
   });
 }
 
+function createDemoLoginCode(now = Date.now(), random = Math.random()) {
+  return `local-demo-${now.toString(36)}-${Math.floor(random * 1e12).toString(36)}`;
+}
+
 async function validateStoredAuth({ storage, apiClient = api } = {}) {
   const stored = getStoredAuth({ storage });
   if (!stored) return null;
@@ -54,15 +58,33 @@ async function validateStoredAuth({ storage, apiClient = api } = {}) {
   }
 }
 
-async function createSessionFromUserAction({ storage, wxApi, apiClient = api } = {}) {
+async function createSessionFromUserAction({
+  storage,
+  wxApi,
+  apiClient = api,
+  allowDemoFallback = ALLOW_DEMO_LOGIN_FALLBACK
+} = {}) {
   const existing = await validateStoredAuth({ storage, apiClient });
   if (existing) return existing;
-  const code = await wxLogin(wxApi);
-  const result = await apiClient.login(
-    code,
-    createIdempotencyKey('login'),
-    { platform: 'wechat-miniprogram', version: CLIENT_VERSION }
-  );
+  let code;
+  try {
+    code = await wxLogin(wxApi);
+  } catch (error) {
+    if (!allowDemoFallback) throw error;
+    code = createDemoLoginCode();
+  }
+  const client = { platform: 'wechat-miniprogram', version: CLIENT_VERSION };
+  let result;
+  try {
+    result = await apiClient.login(code, createIdempotencyKey('login'), client);
+  } catch (error) {
+    if (!allowDemoFallback || error.code !== 'AUTH_CODE_REUSED') throw error;
+    result = await apiClient.login(
+      createDemoLoginCode(),
+      createIdempotencyKey('login-fallback'),
+      client
+    );
+  }
   return saveStoredAuth(result, { storage });
 }
 
@@ -75,6 +97,7 @@ async function logoutCurrentSession({ storage, apiClient = api } = {}) {
 module.exports = {
   SESSION_STORAGE_KEY,
   clearStoredAuth,
+  createDemoLoginCode,
   createSessionFromUserAction,
   getStoredAuth,
   logoutCurrentSession,

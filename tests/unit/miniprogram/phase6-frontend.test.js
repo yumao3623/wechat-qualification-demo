@@ -53,6 +53,98 @@ test('只有明确用户动作调用 Session 创建函数后才执行 wx.login�
   assert.equal(getStoredAuth({ storage }).session.authMode, 'demo');
 });
 
+test('游客 AppID 下 wx.login 失败时仅在 Demo 配置中降级为本地 code', async () => {
+  const storage = fakeStorage();
+  const calls = [];
+  const wxApi = {
+    login(options) {
+      calls.push('wx.login');
+      options.fail({ errMsg: 'login:fail tourist mode' });
+    }
+  };
+  const apiClient = {
+    async getSession() { return null; },
+    async login(code) {
+      calls.push('api.login');
+      assert.match(code, /^local-demo-[a-z0-9]+-[a-z0-9]+$/);
+      return { token: 'd'.repeat(43), session: { id: 'ses_fallback', expiresAt: '2099-01-01T00:00:00.000Z', authMode: 'demo' } };
+    }
+  };
+
+  const auth = await createSessionFromUserAction({ storage, wxApi, apiClient, allowDemoFallback: true });
+
+  assert.deepEqual(calls, ['wx.login', 'api.login']);
+  assert.equal(auth.session.id, 'ses_fallback');
+});
+
+test('关闭 Demo 登录降级后 wx.login 失败必须终止，不能请求后端登录', async () => {
+  const storage = fakeStorage();
+  let apiLoginCount = 0;
+  const wxApi = { login(options) { options.fail({ errMsg: 'login:fail' }); } };
+  const apiClient = {
+    async getSession() { return null; },
+    async login() { apiLoginCount += 1; }
+  };
+
+  await assert.rejects(
+    createSessionFromUserAction({ storage, wxApi, apiClient, allowDemoFallback: false }),
+    /微信登录未完成/
+  );
+  assert.equal(apiLoginCount, 0);
+});
+
+test('开发者工具重复返回已消费 wx.login code 时，Demo 使用新 code 和幂等键重试一次', async () => {
+  const storage = fakeStorage();
+  const loginRequests = [];
+  const wxApi = { login(options) { options.success({ code: 'reused-devtools-code' }); } };
+  const apiClient = {
+    async getSession() { return null; },
+    async login(code, key) {
+      loginRequests.push({ code, key });
+      if (loginRequests.length === 1) {
+        const error = new Error('code reused');
+        error.code = 'AUTH_CODE_REUSED';
+        throw error;
+      }
+      return { token: 'r'.repeat(43), session: { id: 'ses_retried', expiresAt: '2099-01-01T00:00:00.000Z', authMode: 'demo' } };
+    }
+  };
+
+  const auth = await createSessionFromUserAction({ storage, wxApi, apiClient, allowDemoFallback: true });
+
+  assert.equal(loginRequests.length, 2);
+  assert.equal(loginRequests[0].code, 'reused-devtools-code');
+  assert.match(loginRequests[1].code, /^local-demo-/);
+  assert.notEqual(loginRequests[0].key, loginRequests[1].key);
+  assert.match(loginRequests[1].key, /^login-fallback-/);
+  assert.equal(auth.session.id, 'ses_retried');
+});
+
+test('非 code 重复冲突不能触发 Demo 登录重试', async () => {
+  const storage = fakeStorage();
+  let apiLoginCount = 0;
+  const apiClient = {
+    async getSession() { return null; },
+    async login() {
+      apiLoginCount += 1;
+      const error = new Error('conflict');
+      error.code = 'STATE_CONFLICT';
+      throw error;
+    }
+  };
+
+  await assert.rejects(
+    createSessionFromUserAction({
+      storage,
+      wxApi: { login(options) { options.success({ code: 'fresh-code' }); } },
+      apiClient,
+      allowDemoFallback: true
+    }),
+    /conflict/
+  );
+  assert.equal(apiLoginCount, 1);
+});
+
 test('已有 Session 只验证后端，不重复调用 wx.login；失效时清除', async () => {
   const storage = fakeStorage();
   saveStoredAuth({ token: 't'.repeat(43), session: { id: 'ses_old', expiresAt: '2099-01-01T00:00:00.000Z' } }, { storage });

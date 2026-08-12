@@ -39,7 +39,7 @@ test('登录幂等、payload 冲突、code 单次使用与输入校验均有效'
 
   const reused = await request(baseUrl, '/api/auth/login', { method: 'POST', key: 'new-key', body: payload });
   assert.equal(reused.response.status, 409);
-  assert.equal(reused.body.error.code, 'STATE_CONFLICT');
+  assert.equal(reused.body.error.code, 'AUTH_CODE_REUSED');
 
   for (const body of [
     { code: '', client: payload.client },

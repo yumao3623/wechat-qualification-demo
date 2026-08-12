@@ -52,7 +52,7 @@ class SessionService {
     if (consumed) {
       throw new AppError({
         status: 409,
-        code: 'STATE_CONFLICT',
+        code: 'AUTH_CODE_REUSED',
         message: '该 Demo 登录 code 已使用，请重新调用 wx.login。'
       });
     }

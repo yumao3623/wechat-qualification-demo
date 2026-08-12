@@ -1,278 +1,185 @@
 # 决策与假设日志
 
-> 初始化日期：2026-08-10  
-> 用途：记录产品假设、技术选型、简化方案、业务规则假设、地区限制、Mock 处理及未决事项。  
-> 状态说明：`ACCEPTED_FOR_DEMO` 表示当前 Demo 基线；`PROVISIONAL` 表示进入实现前需复核；`OPEN` 表示尚未决定，不能静默实现。
+> 初始化日期：2026-08-10
+> 最近更新：2026-08-11
+> 用途：记录影响当前产品和技术方案的重要选择、简化边界与被取代决策。
+
+状态说明：
+
+- `ACCEPTED_FOR_DEMO`：当前 Demo 采用的基线。
+- `PRODUCTION_REQUIRED`：Demo 可运行，但正式上线必须补齐。
+- `SUPERSEDED`：历史决策，已被后续决策取代。
 
 ## D-001 原生微信小程序
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：小程序端使用原生 WXML、WXSS、JavaScript 和微信官方 API，不使用跨端框架。
-- 原因：符合题目推荐方向，依赖少，招聘方可直接在微信开发者工具检查，登录与隐私 API 行为最容易解释。
-- 影响：页面共享逻辑通过小组件、service 和纯函数控制，不为了复用引入复杂状态框架。
+- 决策：小程序使用原生 WXML、WXSS、JavaScript 和微信官方 API，不使用跨端框架。
+- 原因：依赖少，招聘方可直接在微信开发者工具检查页面、登录和隐私行为。
+- 影响：共享逻辑放在组件、service 和纯函数中，不引入复杂状态框架。
 
-## D-002 单体 Node.js + Express REST
+## D-002 单体 Node.js 与 Express REST
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：后端使用一个 Node.js 20 LTS + Express 进程，同时提供 REST API 和静态 Admin。
-- 原因：完整流程所需规模很小，单进程最容易启动、演示和测试。
-- 明确不做：微服务、消息队列、容器编排、复杂权限或独立 Admin 构建链。
+- 决策：后端使用单个 Node.js 20+ 与 Express 进程提供 REST API。
+- 原因：业务规模小，单进程最容易启动、演示和测试。
+- 非目标：微服务、消息队列、容器编排和复杂权限系统。
 
 ## D-003 JSON Repository 作为 Demo 持久化
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：默认用本地 JSON 文件保存 Session、诊断、报告与 Lead，fixture 与 runtime 数据分离；所有访问经过 Repository。
-- 原因：避免 SQLite 原生依赖或额外服务，降低评审启动失败概率。
-- 限制：只承诺单进程、低并发 Demo；需采用原子替换写入并处理损坏错误。
-- 生产替代：正式数据库、迁移、事务、备份和并发控制。
+- 决策：Session、Consent、Assessment、Report 和 Lead 使用本地 JSON 文件持久化，所有访问经过 Repository 接口。
+- 原因：无需数据库服务或原生依赖，降低评审启动成本。
+- 限制：只支持单进程、低并发；生产需替换为正式数据库、事务、迁移和备份。
 
-## D-004 静态轻量 Admin
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：Admin 使用原生 HTML/CSS/JavaScript，由 Express 提供，只读展示诊断与顾问线索。
-- 原因：满足业务侧可见性要求，同时保持小程序为最高优先级。
-- 限制：本地 Demo 页面不具备生产权限安全，必须在界面和文档明确标注。
-
-## D-005 Mock 为默认且完整的数据模式
+## D-004 Mock 为默认且完整的数据模式
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：所有默认演示和自动测试使用 `MockEnterpriseProvider`；没有企查查 API Key 时全流程必须可用。
-- Mock 规则：完全虚构名称、`DEMO-*` 主体编号、明显 Demo 标签、字段级来源、至少 A/B/C/D 四种结果。
-- 原因：题目禁止爬取且未提供商业 API 授权；真实数据不是验证产品闭环的必要条件。
-- 生产替代：在确认合同、字段、限流、缓存和展示授权后实现 `QichachaEnterpriseProvider` mapper。
+- 决策：默认演示和自动测试使用 `MockEnterpriseProvider`，没有企查查 API Key 时完整流程仍可运行。
+- 数据规则：企业名称完全虚构，使用 `DEMO-*` 编号，持续显示 Demo 标签，并覆盖 A、B、C、D 四种结果场景。
+- 原因：题目禁止网页爬取，且未提供商业 API 授权。
+- 生产替代：确认合同、字段、限流、缓存和展示授权后实现 `QichachaEnterpriseProvider`。
 
-## D-006 Demo Auth 与生产微信认证分离
+## D-005 Demo Auth 与生产微信认证分离
 
-- 状态：`PROVISIONAL`
-- 决策：小程序在用户明确同意后调用 `wx.login`；默认后端 Demo Auth 接收非空 code 并签发随机、短期本地 Session，不调用微信 `code2Session`。
-- 原因：仓库不能包含 AppSecret，评审环境未必有可用生产配置，但题目要求演示完整 Session 流程。
-- 风险：某些测试 AppID/游客 AppID 环境可能限制 `wx.login`；必须在 Phase 4 前用目标开发者工具环境验证。
-- 生产替代：服务端 `WeChatAuthProvider` 使用环境变量中的 AppID/AppSecret 调用 `code2Session`，绑定稳定用户标识并采用生产 Session 安全策略。
-- 禁止：客户端保存 AppSecret、把 code 当 Session、启动时自动登录。
+- 状态：`PRODUCTION_REQUIRED`
+- 决策：用户明确同意后，小程序先调用 `wx.login`；若共享 `touristappid` 环境不支持该能力，仅在 `ALLOW_DEMO_LOGIN_FALLBACK=true` 时生成本地 Demo code。若开发者工具重复返回已消费 code，后端使用专用 `AUTH_CODE_REUSED`，前端以新 code 和新幂等键重试一次。Demo 后端不调用微信 `code2Session`。
+- 原因：仓库不得包含 AppSecret，评审环境也不应依赖生产微信配置。
+- 边界：降级只发生在用户明确同意后，且 `wx.login` 失败或后端明确返回 `AUTH_CODE_REUSED`；其它冲突不重试。Demo code 不等同 openid，不伪造真实微信身份。
+- 生产要求：关闭 Demo 降级，使用服务端 `code2Session`、稳定用户绑定、token 轮换、密钥托管、TLS 和风控。
 
-## D-007 协议同意是诊断创建的双重门槛
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：前端每次打开协议弹窗将 checkbox 重置为 `false`；后端创建诊断同时要求有效 Session 和三个法律文档版本及同意时间。
-- 原因：只靠 UI 控制可被绕过；保存版本快照也避免把一次同意解释成永久同意。
-- 拒绝行为：不登录、不创建诊断、不阻塞游客继续使用。
-
-## D-008 顾问 Lead 使用独立隐私告知
+## D-006 协议同意是诊断创建的双重门槛
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：游客可手填联系人与手机号提交 Lead；提交前提供针对咨询联系目的的简短告知和明确同意。微信手机号授权只作为未来可选增强。
-- 原因：诊断协议不应被当作手机号营销/联系处理的通用授权；同时满足游客可联系顾问和不强制手机号授权。
-- 数据最小化：姓名、手机号、企业、咨询方向、可选备注；不收集无关身份信息。
+- 决策：前端协议弹窗每次打开默认未勾选；后端创建诊断时再次校验三个协议版本、同意时间和来源。
+- 原因：前端控制用户体验，后端控制数据完整性，二者不能互相替代。
+- 处理：关闭、拒绝或未勾选时不登录、不创建诊断，游客功能继续可用。
 
-## D-009 规则采用显式 Evaluator，不做通用规则 DSL
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：四个独立 Evaluator 使用共享纯函数，输出统一结构；不构建可视化规则平台或复杂 JSON 表达式解释器。
-- 原因：四类规则数量有限但语义不同，显式代码更易审核、测试和解释。
-- 边界：Evaluator 不依赖 UI、HTTP、Repository 或全局时间。
-
-## D-010 不确定规则返回人工核验
+## D-007 报告登录复用协议确认
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：细分市场地位、技术领域归属、知识产权与主导产品关联、成果转化质量、审计口径等无法由 Demo 数据可靠判断时，criterion 返回 `manual_review` 或 `unknown`，不得默认满足。
-- 原因：产品是预评估而非官方认定；假精确比保留不确定性风险更高。
-- UI 影响：报告应解释缺什么证据、为何需人工核验、下一步行动是什么。
+- 决策：未登录用户点击“登录查看报告”时先打开协议弹窗，明确同意后才建立 Session；已有有效 Session 直接加载本人报告。
+- 原因：原始需求对发起诊断和查看保存报告都要求用户先明确同意。
+- 边界：报告按钮本身不登录，报告查看不新增独立 Consent API。
 
-## D-011 雏鹰政策选择杭州市“新雏鹰”作为区域示例
+## D-008 顾问咨询使用独立隐私告知
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：Demo 的第四类显示为“雏鹰企业（杭州新雏鹰区域示例）”，规则基线暂采用杭州市 2024 年发布、有效期至 2027-12-31 的《杭州市“新雏鹰”企业培育管理办法》。非杭州企业返回 `not_applicable`。
-- 原因：`雏鹰企业`没有全国统一认定口径；杭州现行文件有明确地域、条件和有效期，适合演示地域判断。Phase 0 检查到天津 2021 版相关办法页面已标记失效，因此不采用。
-- Phase 1 复核：2026-08-10 已复核原文件的实施期，并核对杭州市科技局 2025 年行政规范性文件清理结果；杭科高〔2024〕50号列入“继续有效”目录。若产品方指定目标地区，应新增该地区规则版本并更新 Mock 和文档，而不是静默替换。
-- 官方来源：https://zfgb.hangzhou.gov.cn/11/105220253/t117220253054/518938.shtml
-- 有效性复核来源：https://zfgb.hangzhou.gov.cn/11/109220253/t126220253094/529631.shtml
+- 决策：顾问页免登录，手机号手填，使用独立隐私复选框和同意版本，默认未勾选。
+- 原因：咨询联系与诊断报告属于不同处理目的，不能复用诊断协议。
+- 边界：不强制微信手机号授权，成功只表示线索已保存，不表示顾问已接单。
+
+## D-009 使用显式 Evaluator，不引入规则 DSL
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：四类资质分别使用四个可测试 Evaluator，由 `QualificationEngine` 统一编排。
+- 原因：每类政策条件数量有限，但字段、地域和人工核验边界差异较大；显式代码更容易审查和测试。
+- 影响：规则不写入页面、WXML 或 Route Handler。
+
+## D-010 不确定条件返回人工核验
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：审计、专家、官方平台、材料真实性、行业归类和市场地位等条件不能可靠自动确认时返回 `manual_review`；缺少输入时返回 `unknown`。
+- 原因：预评估不能为了获得更积极的结果而推定满足。
+- 影响：`manual_review` 是判断明细结果，不是资质总体状态。
+
+## D-011 雏鹰企业采用杭州“新雏鹰”区域示例
+
+- 状态：`ACCEPTED_FOR_DEMO`
+- 决策：雏鹰企业使用杭科高〔2024〕50号作为区域规则示例，适用杭州市，有效至 2027-12-31。
+- 原因：“雏鹰企业”没有全国统一口径；杭州文件具有明确地域、条件和有效期，且在 2025 年清理目录中列为继续有效。
+- 影响：非杭州企业返回 `not_applicable`，不将杭州规则套用于其他城市。
 
 ## D-012 专精特新采用 2026 新办法
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：专精特新中小企业规则以工业和信息化部《优质中小企业梯度培育管理办法》为基线；该办法 2026-04-01 实施，旧暂行办法相关标准同时废止。
-- 原因：采用常见的 2022 旧口径会直接造成规划过期。
-- Phase 1 复核：工信部官方解读确认新办法自 2026-04-01 实施，质量评价引用工信厅企业〔2024〕75号并由优质中小企业梯度培育平台套用公式计算。Demo 只接受可核验的平台得分作为预筛输入；没有平台结果时返回 `manual_review`，不自行复算隐藏/不可得的完整平台计算环境。目标年度和省级申报通知仍须在申报前复核。
-- 官方来源：https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20261/0c74a1a375e741f2ae3a5672c298a19c.pdf
-- 官方解读：https://www.miit.gov.cn/jgsj/qyj/gzdt/art/2026/art_87cabbda70004e95b83e04730abf82e7.html
+- 决策：规则基线使用工信部企业〔2026〕2号，自 2026-04-01 实施，并记录旧证书过渡条款。
+- 自动化边界：平台质量评价结果只接受可核验的官方结果；没有平台结果时返回 `manual_review`，不自行伪造完整平台评分。
+- 影响：申报前仍需复核目标年度和省级通知。
 
-## D-013 政策规则版本化与时点快照
+## D-013 政策来源、版本和时点快照
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：每个报告固定保存 `ruleVersion`、生效/检查日期、适用地域、来源、Demo 简化；规则更新不重写旧报告。
-- 原因：政策、年度通知和地区实施细则会变化，报告必须能解释“当时按什么规则评估”。
-- 发布门：每次修改规则都要更新政策映射、测试和文档，并重新执行四类规则回归。
+- 决策：四类规则使用 `docs/PRD.md` 中记录的政府来源、适用地域、有效日期和核验日期。
+- 报告：保存规则集版本、每类规则版本、来源和 Demo 简化说明。
+- 原因：政策变化不能静默改变历史报告语义。
+- 复核门槛：每个申报年度及规则变更前重新核验年度通知、地方细则和过渡条款。
 
 ## D-014 动态表单由规则字段需求计算
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：Evaluator 声明字段需求元数据；Engine 合并适用规则字段并排除已有有效数据，返回 UI schema。
-- 原因：确保动态表单真实影响评估，而不是固定大表单换标题。
-- 边界：`0` 和 `false` 是已知值；统计期不匹配或 `null` 才可能视为缺失。
+- 决策：动态字段等于适用规则所需字段减去企业画像中已知且口径有效的字段。
+- 数据语义：`0` 和 `false` 是有效值；类型、单位或统计期无效才按缺失处理。
+- 冲突处理：用户补充值不静默覆盖已有非空值，双方来源进入 `fieldConflicts[]` 并转人工核验。
+- 定性条件：不生成大段强制表单，改为材料和人工核验建议。
 
-## D-015 诊断异步采用时间推导状态，不引入 worker
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：保存创建时间和当前状态，查询时用可注入 clock 推进阶段，ready 时幂等生成报告。
-- 原因：能展示真实状态流转，并在服务重启后恢复；无需消息队列或常驻后台任务。
-- 测试：fake clock 快速覆盖 pending、processing、ready、failed，无需等待真实秒数。
-
-## D-016 企业补充数据的 Demo 本地保留策略
+## D-015 诊断状态使用时间推导，不引入 Worker
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：为跨页流程可用，小程序按企业 ID 在本地短期保存诊断草稿；Phase 5 TTL 固定为 2 小时，过期后清理，不写日志。Phase 6 实现成功创建诊断、用户退出时还须调用同一清理能力。
-- 原因：小程序页面可能销毁，仅存 Page data 容易丢失；但企业经营数据可能敏感，不应长期留存。
-- 生产替代：上线前重新评估服务端草稿、加密、数据分类、保留期、删除与主体权利机制。
+- 决策：诊断根据创建时间和可注入 clock 推进 `pending → processing → ready | failed`。
+- 原因：需要真实状态变化和重启恢复，但招聘 Demo 不需要队列或后台 Worker。
+- 影响：查询状态、报告或列表时可推进诊断；Report 生成必须幂等。
 
-## D-017 当前开放决策
-
-- 状态：`OPEN`
-- 问题 1：招聘方最终用于 DevTools 验收的 AppID 类型是什么，是否支持完整 `wx.login`？
-- 问题 2：是否有指定“雏鹰企业”目标城市；若有，杭州示例需替换或作为多地区版本之一。
-- 问题 3：是否要求实现真实 `QichachaEnterpriseProvider`，以及是否已获得正式 API 授权与字段清单？当前计划不要求。
-- 处理原则：这些问题不阻塞 Phase 1 文档细化和 Mock 开发，但分别是 Phase 4 登录验收、Phase 3 雏鹰规则冻结、真实数据接入前的决策门。
-
-## D-018 Phase 1 政策核验基线
+## D-016 企业补充数据短期保留
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 核验日期：2026-08-10。
-- 决策：四类规则的正式实现只能以 `docs/PRD.md` 第 11–13 节列出的官方政府来源、版本、地域和字段映射为基线。每个申报年度及每次规则变更前重新检查有效性、年度通知和过渡条款。
-- 自动化原则：能做确定性日期、地域、数量、比例和阈值计算的条件只做“预筛”；审计口径、人员/收入分类、知识产权或产品关联、专家评分、市场地位、平台得分和材料真实性，缺少对应官方/专业证据时返回 `manual_review` 或 `unknown`。
-- 影响：Phase 3 的规则测试必须覆盖 `manual_review`，不能只覆盖 `met/unmet`。
+- 决策：补充数据按企业 ID 保存在小程序本地，默认 TTL 为 2 小时。
+- 清理：诊断创建成功清理当前企业草稿；退出清理全部草稿；过期后自动清理。
+- 原因：支持跨页返回和短时恢复，同时减少经营敏感数据的长期保留。
 
-## D-019 REST 与领域模型冻结方式
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：Phase 1 以 `docs/architecture.md` 的 REST request/response/error、Session、诊断状态机及 Report/Evidence/Gap/Action/Lead schema 作为 Phase 2–4 实现契约。
-- 变更规则：后续若代码需要改变字段、枚举或状态转移，应先说明原因并同步更新 PRD、架构和相关测试，避免文档与实现漂移。
-
-## D-020 Phase 2 企业 fixture 与 Repository 落地
+## D-017 列表字段采用轻量输入
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：Phase 2 使用只读 `JsonEnterpriseRepository` 加载 Git 跟踪的四家虚构 fixture，再由 `MockEnterpriseProvider` 输出 canonical summary/profile；Route 只做输入解析和 HTTP 映射，并通过 `EnterpriseService` 调用可注入 Provider。
-- 多期字段：单一时点指标保存一个统一值对象；近两年/三年同名指标保存按年度升序的统一值对象数组，每个元素独立携带 `value/unit/period/source`。这是对 `architecture.md` 第 5、6 节未展开的多期存储方式的实现澄清，不改变 REST 模型语义。
-- 缺失语义：B 场景有意同时使用 `null` 和字段不存在表示未知；C 场景有意保存 `0` 和 `false` 表示已知零值/否。不得使用 truthy 判断缺失。
-- 真实 Provider：Phase 2 不创建可误认为已接通的 `QichachaEnterpriseProvider` 占位实现。配置为非 `mock` 时启动即明确拒绝；未来取得正式 API 授权后再按 D-005 与架构第 19 节实现。
-- Repository 边界：本阶段 Repository 只读 fixture 并缓存解析结果，不实现 runtime 写入；Session/诊断/报告/Lead 的原子 JSON Repository 留在其计划阶段。
+- 决策：当前动态 schema 未定义复杂知识产权、融资等子字段，前端使用“每行一项”的列表输入。
+- 边界：用户提供的列表只表示声明，权属、类型、状态和产品关联仍需人工核验。
+- 生产要求：先扩展后端列表项契约，再实现结构化子表单。
 
-## D-021 Phase 2 package scripts 可移植性基线
+## D-018 统一领域结果与安全汇总
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：`package.json` 的 `start` 固定使用 `node server/src/server.js`，`test` 固定使用 `node --test`；要求开发环境正常安装 Node.js >=20 并将 `node` 加入 PATH。
-- 禁止：不得把 Codex App bundled Node、Windows 用户目录或其他机器专用绝对路径写入 scripts、README 运行命令或项目代码。
-- 验证：2026-08-10 当前 Codex Shell 可直接找到 pnpm 11.16.0，但不能直接找到 bundled Node。仅对验证进程临时补齐 Node PATH 后，原样执行 `pnpm test` 为 22/22 PASS，原样执行 `pnpm start` 后 Health 返回 `ok` 且 Provider 为 `mock`。
-- 结论：直接运行时的 PATH 差异属于 Codex 宿主环境配置，不是项目级缺陷；不为适配该环境修改可移植 scripts。
+- 决策：总体状态固定为 `promising | opportunity | needs_data | not_met | not_applicable`；判断明细固定为 `met | unmet | unknown | manual_review | not_applicable`。
+- 汇总顺序：不适用、关键门槛未达到、关键数据缺失、人工核验、未发现重大缺口。
+- Mock 场景：A 数据较完整但仍有定性核验，因此允许显示 `opportunity`，不为演示效果强制显示 `promising`。
 
-## D-022 Phase 3 统一领域结果与安全汇总
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：Phase 3 以 `architecture.md` 的总体状态 `promising | opportunity | needs_data | not_met | not_applicable` 和 criterion 结果 `met | unmet | unknown | manual_review | not_applicable` 为唯一领域枚举；不将 `manual_review` 增加为总体 status。
-- 汇总：地域/版本不适用优先，其次是明确硬门槛失败、关键缺数据、人工核验，最后才是无明确缺口的预筛良好。
-- A 场景实际结果：四类均为 `opportunity`，而非 Phase 0 早期示意的多项 `promising`。原因是高企领域/综合评分、科技型中小企业证据口径、专精特新平台/市场地位、新雏鹰产业/综合评审均不能由 Mock 结构化数据安全确认。
-- 原因：不为演示效果把审计、官方平台、专家或材料真实性偷偷当作 `met`。A 仍是“数值较完整、无明确硬失败”的积极演示场景。
-- 公开评分复核：Phase 3 实现时再次查阅科技部有效文件国科发政〔2017〕115号；科技人员指标满分 20，分档为 20/16/12/8/4/0，研发投入满分 50，科技成果满分 30。实现与正式文本一致，不使用记忆中的非官方分值。
-
-## D-023 Phase 3 补充数据与 fixture 完整性
+## D-019 Report 与报告列表语义
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：用户补充使用第 5 节冻结的 `sourceType=user`，并额外保存 `sourceLabel=user_supplied` / `origin=user_supplied`以明确区分来源。与已有非空 Provider/Mock 值冲突时不覆盖，记入 `fieldConflicts[]` 并交人工核验。
-- fixture 更新：A/D 完整场景补齐三年 `domesticRdExpense`、`totalRevenue`、`highTechRevenue`（D）及 `rdScoringMethod`，用于避免把“完整场景”误做成缺数据场景。
-- 数据边界：新增值仍是虚构 `demo_mock`，没有改成 `official_platform/official_registry`，不表示真实官方证据。B 继续使用 `null`/字段不存在，C 继续使用 `0/false/空数组`。
+- 决策：Report 保存企业输入快照、规则快照、四类结果、证据、缺口、行动和免责声明，并在生成后保持不可变。
+- 列表：`GET /api/reports` 以当前用户的 Assessment 为基础，可同时表达 `pending`、`processing`、`ready` 和 `failed`；只有完成项包含四类摘要。
+- 权限：资源所有权只来自服务端 Session，其他用户访问返回资源不存在。
 
-## D-024 Phase 4 范围冲突处理
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：实现 PLAN Phase 4 明确包含的 Demo Auth、Session、Consent、诊断状态机、Report 持久化/列表/详情和游客顾问 Lead；不实现 Admin API/UI。
-- 原因：本次 Phase 4 指令明确写明“不要开发 Admin”，优先级高于早期 PLAN 将 Admin 查询 API 同列在 Phase 4 的安排；PLAN 本身另有 Phase 7 轻量 Admin 阶段。顾问 Lead 则被 PLAN 明确列入 Phase 4 且本次指令允许在此前提下实现。
-- 影响：Phase 4 后端主链路完整，Admin 用例继续保持 `NOT EXECUTED`，不得宣称 Admin 已完成。
-
-## D-025 Session、Consent 与本地身份边界
+## D-020 Session、Consent 与幂等边界
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：`DemoAuthProvider` 只验证 1–256 字符 code 并生成明确标记的本地 Demo 身份；Session token 使用 32 字节随机值，Repository 只存带域分隔的 SHA-256 摘要，默认 TTL 12 小时，注销只吊销 Session 不删除报告。
-- code 与幂等：code 摘要执行单次使用；相同幂等键/相同 payload 不重复创建 Session。服务重建后同一幂等请求为原 Session 轮换新 token，以兼顾幂等恢复和“不持久化明文 token”。
-- Consent：冻结 API 没有强制 `accepted` 字段，因此“完整提交当前三个版本 + 有效 ISO 8601 `agreedAt` + `assessment-dialog` 来源”本身构成显式同意证据；如提交 `accepted` 只能为 `true`。校验成功后单独保存 `accepted=true`、Session/User、诊断、用途上下文和记录时间，再保存 Assessment 协议快照。
-- 时间规则：此前实现的“`agreedAt` 必须在最近 24 小时内”没有法律、微信平台或冻结 PRD 依据，属于未经记录的 Demo 假设，Phase 4 基线确认时已删除。现在不设置同意证据最大年龄；仅要求时间可解析，且不得明显晚于服务器时间（允许 5 分钟客户端时钟偏差）。该校验是 Demo 数据一致性设计，不是官方合规要求。协议是否因版本更新需要重新同意由版本匹配控制。
-- 禁止：Demo code 不等同 openid，不调用/伪造 `code2Session`，不读取 AppID/AppSecret，不在日志或错误中输出 code/token。
+- 决策：Session token 使用随机值，Repository 只存 SHA-256 摘要，默认 TTL 12 小时；注销吊销 Session，不删除报告。
+- 登录 code 按摘要执行单次使用。相同幂等键和相同 payload 不重复创建 Session、诊断或 Lead；不同 payload 复用幂等键返回冲突。
+- Consent 不设置未经需求支持的“最近 24 小时”限制，只校验可解析时间、不得明显晚于服务器时间以及当前协议版本。
+- 原因：保留可重试性，同时避免持久化明文 token 和重复业务记录。
 
-## D-026 Phase 4 状态推进与 Report 列表语义
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：延续 D-015，以创建时间和可注入 clock 推进 `pending → processing → ready | failed`；默认 pending 300ms、八阶段各 200ms。查询状态、报告或列表时推进，重建服务后从 JSON 恢复。
-- Report：ready 时调用一次 Engine 和 ReportGenerator，先保存不可变 Report，再把 `reportId` 写回 Assessment；如果 Engine 或 Report 保存失败，Assessment 转为稳定 `failed` 并只暴露公共错误码/文案。
-- 列表：`GET /api/reports` 从当前用户 Assessment 汇总，以便同时表达无报告、处理中、完成和失败；只有 ready 项关联 Report 四类摘要。
-- 缺失数据：沿用 PRD 冻结逻辑，Scenario B 可以生成四类 `needs_data` 报告，不增加未经需求授权的硬阻断门。
-- 权限：诊断和报告所有权只取服务端 Session 的 `userId`，其他用户访问统一返回 404，客户端不能传 user ID 获得访问权。
-
-## D-027 Phase 4 JSON Runtime 一致性边界
+## D-021 JSON Runtime 一致性边界
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：sessions、consents、assessments、reports、leads 使用五个独立 JSON 集合；每次写入采用临时文件加原子替换，同一进程内通过 Promise 队列串行化单集合写入。
-- 错误处理：JSON 损坏时返回安全的 `INTERNAL_ERROR` 并保留原文件，不把损坏内容静默覆盖成空集合。
-- 限制：这不是数据库事务或跨进程锁，只承诺招聘 Demo 的单进程低并发；生产必须替换为事务数据库、迁移、备份和并发控制。
+- 决策：五类 runtime 数据使用独立 JSON 集合，写入采用临时文件加原子替换，同一集合在单进程内串行写入。
+- 错误处理：文件损坏时保留原文件并返回安全错误，不静默覆盖为空集合。
+- 限制：不提供数据库事务和跨进程锁。
 
-## D-028 Phase 5 原生小程序与游客边界
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：按 D-001 创建原生 `miniprogram/`，根目录 `project.config.json` 指向该目录并使用 `touristappid`。Phase 5 仅调用企业搜索/详情与 missing-fields 三类游客 API。
-- 禁止边界：小程序不包含 `wx.login`、手机号/用户资料授权、Auth API、协议同意、诊断创建/进度、报告详情、证据/行动或顾问 UI。报告 Tab 仅为无主动登录按钮的游客占位。
-- 原因：Phase 5 的验收核心是“先完整体验数据准备，再在 Phase 6 的明确用户行为后进入合规登录”；提前复用 Phase 4 Auth API 会破坏时序。
-- 验证：静态测试扫描上述禁止调用，同时检查所有 `wx.request` 只出现在 `services/api.js`。
-
-## D-029 Phase 5 草稿与 list 字段简化
+## D-022 测试 AppID 配置
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 草稿：将 D-016 在 Phase 5 落地为“按 enterpriseId 隔离的小程序本地草稿 + 2 小时 TTL”。只在 Backend 对补数校验与缺失重算成功后持久化，网络/口径错误不覆盖上次合法草稿。
-- 切换企业：每家企业使用独立 key；可保留 A 的未过期草稿以便用户返回，但 B 永远不读取 A 的 supplements/schema。这满足“不串企业”且避免误删用户刚填内容。
-- `list` 简化：当前 schema 未提供可生成完整知识产权/融资子表单的子字段定义，Phase 5 采用“每行一项”将用户声明组装为列表。页面明确说明权属、类型、状态、产品关联仍需核验；不将简化条目当作官方证据。
-- 未来：若 Phase 6/生产需要高质量知识产权预筛，应先扩展 Backend schema 的 list item 契约，再实现结构化子表单，不在前端猜测固定字段。
+- 当前配置：共享 `project.config.json` 使用 `touristappid`，招聘方无需原项目权限即可导入并运行完整本地 Demo 流程。
+- 个人验证：需要验证真实 `wx.login` 时，把有权限的测试 AppID 放入被忽略的 `project.private.config.json`。
+- 安全与交付边界：AppSecret 永不进入前端或仓库；白名单打包脚本排除私有配置、`.env`、runtime 数据、依赖和 Git 元数据。
 
-## D-030 Phase 6 登录与 Session 前端边界
+## D-023 本地管理页决策已取代
 
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：`wx.login` 唯一直接调用收敛到 `miniprogram/services/auth.js`。只有用户在发起诊断协议弹窗明确同意，或点击“登录查看报告”后在报告场景协议弹窗明确同意时，才调用 Session 创建函数；报告按钮点击本身不得登录。
-- Tab 行为：报告和“我的”进入时只读取并验证已有本地 Session；没有 token 时直接展示游客态，不调用 `wx.login`。Session 失效/过期时清除本地 token。
-- 本地保存：使用 `qualification-demo-session` 保存 `{ token, session }`；token 不进入 URL、页面 data、日志或错误文案。退出调用后端注销后清除 Session 和全部补充草稿。
-- 已有 Session：用户再次明确发起诊断时先验证并复用有效 Session，不为了形式重复调用 `wx.login`。这仍满足“明确同意后才允许调用”的时序边界。
-- 未决风险：`touristappid` 在目标微信开发者工具中是否支持完整 `wx.login` 仍需人工验证，因此 D-006 继续保留 `PROVISIONAL`，不能把自动测试当作 DevTools PASS。
+- 状态：`SUPERSEDED`
+- 原决策：曾使用同一 Express 进程提供本地只读管理页，用于观察诊断和顾问线索。
+- 取代原因：原始招聘需求只包含微信小程序三 Tab、主流程、后端支撑和文档测试，不包含运营后台。
+- 当前结果：交付物不包含管理页面、管理 API、线索列表、派单、导出、CRM、RBAC 或审批能力；游客顾问提交接口仍属于主流程。
 
-## D-031 Phase 6 Consent、重试与状态恢复
+## D-024 人工验收边界
 
 - 状态：`ACCEPTED_FOR_DEMO`
-- 决策：不新增独立 Consent API；沿用架构第 9.5.1 节，将协议版本、`accepted=true`、`agreedAt` 和 `assessment-dialog` 随 `POST /api/assessments` 一次提交。
-- 弹窗：组件每次 `open()` 都重置 `checked=false`。关闭/拒绝不保存同意、不登录、不创建诊断。
-- 幂等：登录与诊断使用不同幂等键；登录成功但诊断网络失败时，重试复用同一诊断 payload 和幂等键，不单独补交 Consent。
-- 状态：继续采用 D-015/D-026 的 HTTP 查询推进方案；前台 500ms 轮询，后台停止，回前台立即从 Backend 恢复。没有引入 WebSocket、消息队列或前端假状态机。
-
-## D-032 Phase 6 Report 与 Lead UI 数据边界
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- Report：报告详情、Evidence、Gap、Action 全部读取 Backend 持久化 Report；前端只进行中文枚举映射、日期和值的展示格式化，不导入或复写 Rule Engine。
-- 五态：报告 Tab 以本地 Session 和 `/api/reports` 返回的 Assessment 状态表达未登录、无报告、进行中、已完成和失败；混合状态允许同时出现在列表中。
-- Lead：顾问页保持游客可用，手机号手填，独立同意默认 `false`；不实现或暗示强制手机号授权。提交成功只显示“咨询需求已提交”。
-- 清理：诊断创建成功清理当前企业草稿；退出清理全部企业草稿。Backend 报告与 Lead 的保留语义不由前端注销改变。
-- 范围：Phase 6 不实现 Admin，未修改后端 Route/Service/Repository/Rule Engine 契约。
-
-## D-033 Report Tab 复用协议门
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 发现：Phase 6 初版的未登录报告按钮直接调用 Session 创建函数，虽然不是自动登录，但绕过了原始需求中“查看报告也须经协议同意”的前端时序门。
-- 修正：复用 `AgreementDialog` 的法律链接、默认未勾选、拒绝/关闭能力；报告场景使用独立标题和 CTA。按钮只打开弹窗，`confirm` 才创建/复用 Session 并加载列表。
-- 边界：已有有效 Session 不重复要求同意；报告查看不新增后端 Consent API，也不改诊断创建的 Consent Gate、权限隔离或 Rule Engine。
-
-## D-034 Phase 7 本地只读 Admin 接入
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 决策：按 D-004 在同一 Express 进程提供 `/admin/` 原生静态页与 `/api/admin/assessments`、`/api/admin/leads`；只读读取现有 Assessment/Lead JSON Repository。
-- Repository：仅向 `AssessmentRepository` 和 `LeadRepository` 增加 `listAll()` 查询，并复用已有 `ReportRepository.findByAssessmentId()` 核对持久化报告。Admin 不读取 Session/Consent，不调用 Rule Engine，不修改 Diagnosis/Report/Lead，也不提供编辑、删除、导出或派单。
-- 本地限制：静态页和 API 共用 loopback 地址门禁；远程请求返回 403。此设计只是降低本地 Demo 暴露面，不宣称具备生产身份、RBAC 或审计。
-- 最小字段：诊断只返回企业摘要、诊断/报告状态和时间；Lead 手机号在 Backend 脱敏，只返回展示需要的企业、联系人、方向、状态和时间。Session、token/hash、幂等 hash、Consent、输入快照和完整手机号均不出现在 Admin 响应。
-- 验证：Phase 7 自动测试覆盖空数据、真实持久化数据、非本地 403、安全错误、四态实现及脱敏；真实浏览器验证正常、Empty、Loading 与 Backend 断开 Error。小程序目录零修改。
-
-## D-035 Phase 8 共享 AppID 与最终验收基线
-
-- 状态：`ACCEPTED_FOR_DEMO`
-- 发现：共享 `project.config.json` 曾包含具体测试 AppID，但 README、架构与 D-028 均声明为 `touristappid`，形成可移植性和文档一致性缺陷；AppID 不是 AppSecret，但不应把共享仓库绑定到单一评审环境。
-- 决策：共享配置恢复为 `touristappid` 并由自动测试锁定；需要完整 `wx.login` 的评审方测试 AppID 写入已忽略的 `project.private.config.json`。既有 DevTools 人工验收事实继续保留，不推断其 AppID 类型。
-- 验收：Phase 8 最终基线为 92 tests / 92 PASS / 0 FAIL；新增独立 Backend 子进程 E2E、跨字段错误映射回归，并完成语法、JSON、路径、合规、敏感信息和 Git 静态检查。用户使用测试 AppID 完成 14 项 DevTools 最终冒烟并全部 PASS；真机/弱网/多尺寸/生命周期专项继续为 `NOT EXECUTED`。
-- 人工发现与修正：研发人数 100 大于 Scenario B 总人数 45 时，Backend 正确返回不带年度的字段路径，前端初版无法映射到 `rdEmployeeCount.2025`。Phase 8 以基础字段 key 安全匹配年度 schema，未放宽任何服务端业务关系校验。
+- 决策：自动测试、微信开发者工具 E2E 和真机专项分开记录，不以自动测试替代真机结论。
+- 当前事实：此前微信开发者工具主流程已通过；当前自动测试为 91 tests / 91 PASS / 0 FAIL，包含共享 AppID、游客模式登录降级和重复 code 恢复边界。
+- 未执行：报告 Tab 五态专项构造、网络故障、前后台恢复、多尺寸与键盘、真机 HTTPS、草稿真实等待 2 小时。
+- 记录位置：`docs/test-cases.md` 是测试状态的唯一主定义。

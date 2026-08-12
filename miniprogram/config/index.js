@@ -4,6 +4,7 @@ module.exports = Object.freeze({
   TARGET_APPLICATION_YEAR: 2026,
   DRAFT_TTL_MS: 2 * 60 * 60 * 1000,
   CLIENT_VERSION: '0.6.0',
+  ALLOW_DEMO_LOGIN_FALLBACK: true,
   STATUS_POLL_INTERVAL_MS: 500,
   LEGAL_VERSIONS: Object.freeze({
     userAgreementVersion: '2026-08-10',

@@ -43,7 +43,7 @@ async function stopChild(child) {
   if (child.exitCode === null) child.kill('SIGKILL');
 }
 
-test('Phase 8 独立 Backend 进程完整链路与 Admin 只读脱敏', async (t) => {
+test('Phase 8 独立 Backend 进程完整链路', async (t) => {
   const root = path.resolve(__dirname, '../../..');
   const runtimePath = await fs.mkdtemp(path.join(os.tmpdir(), 'qualification-phase8-'));
   const port = await reservePort();
@@ -148,15 +148,6 @@ test('Phase 8 独立 Backend 进程完整链路与 Admin 只读脱敏', async (t
     }
   });
   assert.equal(lead.response.status, 201);
-
-  const adminAssessments = await request(baseUrl, '/api/admin/assessments');
-  const adminLeads = await request(baseUrl, '/api/admin/leads');
-  assert.equal(adminAssessments.body.data.items.length, 1);
-  assert.equal(adminLeads.body.data.items.length, 1);
-  const adminJson = JSON.stringify(adminLeads.body);
-  assert.doesNotMatch(adminJson, /13800000000/);
-  assert.doesNotMatch(adminJson, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  assert.match(adminLeads.body.data.items[0].maskedMobile, /^138\*+0000$/);
 
   const logout = await request(baseUrl, '/api/auth/session', {
     method: 'DELETE', token, key: 'phase8-process-logout'
